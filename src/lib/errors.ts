@@ -30,7 +30,7 @@ export class NotFoundError extends AppError {
 export class ValidationError extends AppError {
   constructor(
     message = "Invalid input.",
-    public readonly fieldErrors?: Record<string, string[]>,
+    public readonly fieldErrors?: Record<string, string[] | undefined>,
   ) {
     super(message, 400);
   }
