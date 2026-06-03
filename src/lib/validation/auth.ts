@@ -27,15 +27,23 @@ export type LoginInput = z.infer<typeof loginSchema>;
  * the credentials object, which a strict schema would reject. Unknown keys are
  * stripped; the strict boundary check lives on the user-facing loginAction.
  */
+// Auth.js serializes credentials via URLSearchParams, which can turn an absent
+// optional field into the literal string "undefined"/"". Coerce those to
+// undefined so optional MFA fields don't fail validation.
+const optionalLoose = (v: unknown) => (v === "" || v === "undefined" || v == null ? undefined : v);
+
 export const credentialsSchema = z.object({
   email: emailSchema,
   password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
-  totp: z
-    .string()
-    .trim()
-    .regex(/^\d{6}$/)
-    .optional(),
-  backupCode: z.string().trim().max(20).optional(),
+  totp: z.preprocess(
+    optionalLoose,
+    z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/)
+      .optional(),
+  ),
+  backupCode: z.preprocess(optionalLoose, z.string().trim().max(20).optional()),
 });
 
 /** Strong-password field reused by signup / reset / invite acceptance. */

@@ -32,13 +32,17 @@ export async function loginAction(values: unknown): Promise<LoginResult> {
   }
 
   try {
-    await signIn("credentials", {
+    // Only include optional fields when present — Auth.js serializes credentials
+    // through URLSearchParams, which would turn `undefined` into the literal
+    // string "undefined" and fail validation in authorize.
+    const credentials: Record<string, string> = {
       email: parsed.data.email,
       password: parsed.data.password,
-      totp: parsed.data.totp,
-      backupCode: parsed.data.backupCode,
-      redirect: false,
-    });
+    };
+    if (parsed.data.totp) credentials.totp = parsed.data.totp;
+    if (parsed.data.backupCode) credentials.backupCode = parsed.data.backupCode;
+
+    await signIn("credentials", { ...credentials, redirect: false });
   } catch (error) {
     if (error instanceof AuthError) {
       return { ok: false, error: "Invalid email, password, or 2FA code." };
