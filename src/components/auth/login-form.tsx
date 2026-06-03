@@ -67,20 +67,6 @@ export function LoginForm() {
         {errors.password && <p className="text-destructive text-xs">{errors.password.message}</p>}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="totp">
-          Authenticator code <span className="text-muted-foreground">(if 2FA enabled)</span>
-        </Label>
-        <Input
-          id="totp"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          placeholder="123456"
-          {...register("totp")}
-        />
-        {errors.totp && <p className="text-destructive text-xs">{errors.totp.message}</p>}
-      </div>
-
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}
         Sign in
