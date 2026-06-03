@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const metadata = { title: "Audit log · School RBAC Platform" };
+export const metadata = { title: "Audit log · Scholaris" };
 
 export default async function AuditPage({
   searchParams,

@@ -12,7 +12,7 @@ import { PageHeader } from "@/components/app/page-header";
 import { StatCard } from "@/components/app/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata = { title: "Dashboard · School RBAC Platform" };
+export const metadata = { title: "Dashboard · Scholaris" };
 
 export default async function DashboardPage() {
   const user = await requireUser();

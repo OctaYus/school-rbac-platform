@@ -3,7 +3,7 @@ import { Capability } from "@/lib/auth/permissions";
 import { PageHeader } from "@/components/app/page-header";
 import { StudentForm } from "@/components/students/student-form";
 
-export const metadata = { title: "New student · School RBAC Platform" };
+export const metadata = { title: "New student · Scholaris" };
 
 export default async function NewStudentPage() {
   await requireCapability(Capability.STUDENT_WRITE);

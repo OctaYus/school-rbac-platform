@@ -6,27 +6,11 @@ import { requireUser } from "@/lib/auth/guards";
 import { listStudents } from "@/lib/data/students";
 import { studentListQuerySchema } from "@/lib/validation/student";
 import { PageHeader } from "@/components/app/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { StudentsTable } from "@/components/students/students-table";
 
-export const metadata = { title: "Students · School RBAC Platform" };
-
-const STATUS_VARIANT: Record<StudentStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  ACTIVE: "default",
-  INACTIVE: "secondary",
-  GRADUATED: "outline",
-  SUSPENDED: "destructive",
-  ARCHIVED: "secondary",
-};
+export const metadata = { title: "Students · Scholaris" };
 
 export default async function StudentsPage({
   searchParams,
@@ -37,6 +21,15 @@ export default async function StudentsPage({
   const sp = await searchParams;
   const query = studentListQuerySchema.parse(sp);
   const { rows, total, page, pages } = await listStudents(user, query);
+
+  const tableRows = rows.map((s) => ({
+    id: s.id,
+    fullName: s.fullName,
+    externalId: s.externalId,
+    status: s.status,
+    marksCount: s._count.marks,
+    healthCount: s._count.healthRecords,
+  }));
 
   const makeHref = (overrides: Record<string, string | number>) => {
     const params = new URLSearchParams();
@@ -84,44 +77,7 @@ export default async function StudentsPage({
         </Button>
       </form>
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>External ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Records</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-muted-foreground py-8 text-center">
-                  No students found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-medium">
-                    <Link href={`/students/${s.id}`} className="hover:underline">
-                      {s.fullName}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{s.externalId ?? "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant={STATUS_VARIANT[s.status]}>{s.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-right">
-                    {s._count.marks} marks · {s._count.healthRecords} health
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <StudentsTable rows={tableRows} />
 
       <div className="text-muted-foreground mt-4 flex items-center justify-between text-sm">
         <span>

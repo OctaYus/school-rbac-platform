@@ -3,7 +3,7 @@ import { ShieldX } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Forbidden · School RBAC Platform" };
+export const metadata = { title: "Forbidden · Scholaris" };
 
 export default function ForbiddenPage() {
   return (

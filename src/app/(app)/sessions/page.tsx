@@ -19,8 +19,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { MarkSessionActions } from "@/components/sessions/mark-session-actions";
+import { DeleteSessionButton } from "@/components/sessions/delete-session-button";
 
-export const metadata = { title: "Sessions · School RBAC Platform" };
+export const metadata = { title: "Sessions · Scholaris" };
 
 const STATUS_VARIANT: Record<SessionStatus, "default" | "secondary" | "destructive" | "outline"> = {
   SCHEDULED: "default",
@@ -106,11 +107,18 @@ export default async function SessionsPage({
                       <Badge variant={STATUS_VARIANT[s.status]}>{s.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      {actionable ? (
-                        <MarkSessionActions id={s.id} />
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
+                      <div className="flex items-center justify-end gap-1">
+                        {actionable && <MarkSessionActions id={s.id} />}
+                        {canAssign && (
+                          <DeleteSessionButton
+                            id={s.id}
+                            label={`${s.type} · ${format(s.scheduledAt, "PP")}`}
+                          />
+                        )}
+                        {!actionable && !canAssign && (
+                          <span className="text-muted-foreground text-xs">—</span>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const metadata = { title: "Forgot password · School RBAC Platform" };
+export const metadata = { title: "Forgot password · Scholaris" };
 
 export default function ForgotPasswordPage() {
   return (

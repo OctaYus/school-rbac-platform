@@ -6,7 +6,7 @@ import { getStudentDetail } from "@/lib/data/students";
 import { PageHeader } from "@/components/app/page-header";
 import { StudentForm } from "@/components/students/student-form";
 
-export const metadata = { title: "Edit student · School RBAC Platform" };
+export const metadata = { title: "Edit student · Scholaris" };
 
 export default async function EditStudentPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireCapability(Capability.STUDENT_WRITE);

@@ -9,7 +9,7 @@ import { authenticator } from "otplib";
  * memory. Backup codes are high-entropy and stored as SHA-256 hashes.
  */
 
-const ISSUER = "School RBAC Platform";
+const ISSUER = "Scholaris";
 
 // Allow +/- 1 time-step (30s) of clock skew.
 authenticator.options = { window: 1 };

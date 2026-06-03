@@ -13,6 +13,7 @@ import { type ActionResult, fail, handleActionError, ok } from "@/lib/action-res
 import {
   createStudentSchema,
   deleteStudentSchema,
+  deleteStudentsSchema,
   healthRecordSchema,
   markSchema,
   updateNotesSchema,
@@ -154,6 +155,31 @@ export async function deleteStudent(values: unknown): Promise<ActionResult> {
     });
     revalidatePath("/students");
     return ok();
+  } catch (e) {
+    return handleActionError(e);
+  }
+}
+
+export async function deleteStudents(values: unknown): Promise<ActionResult<{ count: number }>> {
+  try {
+    const user = await requireCapability(Capability.STUDENT_WRITE);
+    const data = parse(deleteStudentsSchema, values);
+
+    // Teachers may only delete students assigned to them — assert each first.
+    for (const id of data.ids) {
+      await assertStudentAccess(user, id);
+    }
+
+    const result = await prisma.student.deleteMany({ where: { id: { in: data.ids } } });
+    await writeAudit({
+      actorId: user.id,
+      action: "student.bulkDelete",
+      entity: "Student",
+      entityId: data.ids[0],
+      diff: { count: result.count, ids: data.ids },
+    });
+    revalidatePath("/students");
+    return ok({ count: result.count });
   } catch (e) {
     return handleActionError(e);
   }

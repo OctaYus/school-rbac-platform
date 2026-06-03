@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import type { Role } from "@prisma/client";
 
 import { can } from "@/lib/auth/permissions";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/brand/logo";
 import { NAV_ITEMS } from "@/components/app/nav-items";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -24,9 +25,8 @@ export function MobileNav({ role }: { role: Role }) {
         </Button>
       </SheetTrigger>
       <SheetContent>
-        <SheetTitle className="mb-6 flex items-center gap-2">
-          <GraduationCap className="size-5" />
-          School RBAC
+        <SheetTitle className="mb-6">
+          <Logo />
         </SheetTitle>
         <nav className="flex flex-col gap-1">
           {NAV_ITEMS.filter((item) => !item.capability || can(role, item.capability)).map(

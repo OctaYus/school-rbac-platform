@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const metadata = { title: "Sign in · School RBAC Platform" };
+export const metadata = { title: "Sign in · Scholaris" };
 
 export default async function LoginPage({
   searchParams,

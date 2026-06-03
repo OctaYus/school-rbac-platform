@@ -1,7 +1,7 @@
 import { AcceptInviteForm } from "@/components/auth/accept-invite-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata = { title: "Accept invite · School RBAC Platform" };
+export const metadata = { title: "Accept invite · Scholaris" };
 
 export default async function AcceptInvitePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

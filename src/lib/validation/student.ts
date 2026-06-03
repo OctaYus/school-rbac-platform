@@ -29,6 +29,8 @@ export const updateNotesSchema = z
 
 export const deleteStudentSchema = z.object({ id: cuid }).strict();
 
+export const deleteStudentsSchema = z.object({ ids: z.array(cuid).min(1).max(200) }).strict();
+
 export const markSchema = z
   .object({
     studentId: cuid,

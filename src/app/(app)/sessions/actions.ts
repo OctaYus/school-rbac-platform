@@ -14,6 +14,7 @@ import { sessionActionLimiter } from "@/lib/security/ratelimit";
 import { getClientIp } from "@/lib/security/request";
 import {
   assignSessionSchema,
+  deleteSessionSchema,
   markSessionSchema,
   sessionTemplateSchema,
 } from "@/lib/validation/session";
@@ -110,6 +111,31 @@ export async function markSession(values: unknown): Promise<ActionResult> {
             }
           : {}),
       },
+    });
+    revalidatePath("/sessions");
+    return ok();
+  } catch (e) {
+    return handleActionError(e);
+  }
+}
+
+export async function deleteSession(values: unknown): Promise<ActionResult> {
+  try {
+    const user = await requireCapability(Capability.SESSION_ASSIGN);
+    const data = parse(deleteSessionSchema, values);
+
+    const existing = await prisma.session.findUnique({
+      where: { id: data.id },
+      select: { id: true },
+    });
+    if (!existing) return fail("Session not found.");
+
+    await prisma.session.delete({ where: { id: data.id } });
+    await writeAudit({
+      actorId: user.id,
+      action: "session.delete",
+      entity: "Session",
+      entityId: data.id,
     });
     revalidatePath("/sessions");
     return ok();

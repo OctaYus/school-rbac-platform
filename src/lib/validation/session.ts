@@ -38,6 +38,8 @@ export const markSessionSchema = z
     path: ["scheduledAt"],
   });
 
+export const deleteSessionSchema = z.object({ id: cuid }).strict();
+
 export const sessionTemplateSchema = z
   .object({
     type: z.string().trim().min(1).max(80),

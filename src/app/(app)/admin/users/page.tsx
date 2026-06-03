@@ -16,7 +16,7 @@ import {
 import { InviteUserDialog } from "@/components/admin/invite-user-dialog";
 import { UserActions } from "@/components/admin/user-actions";
 
-export const metadata = { title: "Users · School RBAC Platform" };
+export const metadata = { title: "Users · Scholaris" };
 
 export default async function AdminUsersPage() {
   const actor = await requireCapability(Capability.USER_MANAGE);

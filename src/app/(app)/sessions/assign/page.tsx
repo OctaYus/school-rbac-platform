@@ -4,7 +4,7 @@ import { getActiveTeachers, getSessionTemplates } from "@/lib/data/sessions";
 import { PageHeader } from "@/components/app/page-header";
 import { AssignForm } from "@/components/sessions/assign-form";
 
-export const metadata = { title: "Assign session · School RBAC Platform" };
+export const metadata = { title: "Assign session · Scholaris" };
 
 export default async function AssignSessionPage() {
   await requireCapability(Capability.SESSION_ASSIGN);
