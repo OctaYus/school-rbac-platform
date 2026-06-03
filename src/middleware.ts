@@ -19,7 +19,7 @@ const PUBLIC_PREFIXES = [
   "/forgot-password",
   "/accept-invite",
   "/api/health",
-  "/api/_diag",
+  "/api/diag",
 ];
 const ADMIN_PREFIXES = ["/admin"];
 
