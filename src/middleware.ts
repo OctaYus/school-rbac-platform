@@ -14,7 +14,13 @@ import { buildCsp, SECURITY_HEADERS } from "@/lib/security/headers";
  */
 const { auth } = NextAuth(authConfig);
 
-const PUBLIC_PREFIXES = ["/login", "/forgot-password", "/accept-invite", "/api/health"];
+const PUBLIC_PREFIXES = [
+  "/login",
+  "/forgot-password",
+  "/accept-invite",
+  "/api/health",
+  "/api/_diag",
+];
 const ADMIN_PREFIXES = ["/admin"];
 
 function makeNonce(): string {
