@@ -10,7 +10,7 @@ import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { backupCodeMatches, verifyTotp } from "@/lib/auth/totp";
 import { isLocked, registerFailedLogin, registerSuccessfulLogin } from "@/lib/auth/lockout";
 import { decrypt } from "@/lib/security/crypto";
-import { loginSchema } from "@/lib/validation/auth";
+import { credentialsSchema } from "@/lib/validation/auth";
 
 const JWT_REVALIDATE_MS = 60_000;
 
@@ -50,15 +50,11 @@ const providers: NextAuthConfig["providers"] = [
     },
     async authorize(raw) {
       try {
-        const parsed = loginSchema.safeParse(raw);
+        const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password, totp, backupCode } = parsed.data;
 
         const user = await prisma.user.findUnique({ where: { email } });
-        // TEMP diagnostic
-        console.error(
-          `[diag] email=${email} found=${!!user} hasHash=${!!user?.passwordHash} active=${user?.isActive} locked=${user?.lockedUntil ?? "none"} dbHost=${(process.env.DATABASE_URL ?? "").replace(/^.*@([^/]*).*$/, "$1")}`,
-        );
 
         if (!user || !user.passwordHash) {
           await verifyPassword(await dummyHash(), password); // equalize timing
@@ -96,9 +92,9 @@ const providers: NextAuthConfig["providers"] = [
           tokenVersion: user.tokenVersion,
         };
       } catch (e) {
-        // TEMP diagnostic: surface the real cause behind a generic CredentialsSignin.
-        console.error("[authorize] failure:", e instanceof Error ? e.message : e);
-        throw e;
+        // Log the real cause server-side; Auth.js surfaces only a generic error.
+        console.error("[auth] authorize error:", e instanceof Error ? e.message : e);
+        return null;
       }
     },
   }),

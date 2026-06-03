@@ -21,6 +21,23 @@ export const loginSchema = z
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+/**
+ * Schema used INSIDE the Credentials `authorize` callback. Intentionally NOT
+ * `.strict()`: Auth.js injects framework fields (csrfToken, callbackUrl, …) into
+ * the credentials object, which a strict schema would reject. Unknown keys are
+ * stripped; the strict boundary check lives on the user-facing loginAction.
+ */
+export const credentialsSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+  totp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/)
+    .optional(),
+  backupCode: z.string().trim().max(20).optional(),
+});
+
 /** Strong-password field reused by signup / reset / invite acceptance. */
 export const strongPasswordSchema = z
   .string()
