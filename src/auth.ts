@@ -55,6 +55,10 @@ const providers: NextAuthConfig["providers"] = [
         const { email, password, totp, backupCode } = parsed.data;
 
         const user = await prisma.user.findUnique({ where: { email } });
+        // TEMP diagnostic
+        console.error(
+          `[diag] email=${email} found=${!!user} hasHash=${!!user?.passwordHash} active=${user?.isActive} locked=${user?.lockedUntil ?? "none"} dbHost=${(process.env.DATABASE_URL ?? "").replace(/^.*@([^/]*).*$/, "$1")}`,
+        );
 
         if (!user || !user.passwordHash) {
           await verifyPassword(await dummyHash(), password); // equalize timing
