@@ -2,26 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, LayoutDashboard, ScrollText, UserCog, Users } from "lucide-react";
 import type { Role } from "@prisma/client";
 
-import { Capability, can } from "@/lib/auth/permissions";
+import { can } from "@/lib/auth/permissions";
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  href: string;
-  label: string;
-  icon: typeof LayoutDashboard;
-  capability?: Capability;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/students", label: "Students", icon: Users },
-  { href: "/sessions", label: "Sessions", icon: CalendarDays },
-  { href: "/admin/users", label: "Users", icon: UserCog, capability: Capability.USER_MANAGE },
-  { href: "/admin/audit", label: "Audit log", icon: ScrollText, capability: Capability.AUDIT_VIEW },
-];
+import { NAV_ITEMS } from "@/components/app/nav-items";
 
 export function Sidebar({ role }: { role: Role }) {
   const pathname = usePathname();
