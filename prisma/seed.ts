@@ -15,8 +15,14 @@ import { encrypt } from "../src/lib/security/crypto";
 
 const prisma = new PrismaClient();
 
-/** Generate a strong password that satisfies the platform policy. */
+/**
+ * Generate a strong password that satisfies the platform policy.
+ * If SEED_DEMO_PASSWORD is set (CI / local e2e), use it for deterministic
+ * logins; otherwise generate a fresh random one per user.
+ */
 function strongPassword(): string {
+  const fixed = process.env.SEED_DEMO_PASSWORD;
+  if (fixed) return fixed;
   // base64url of 18 random bytes (~24 chars) + guaranteed character classes.
   const core = randomBytes(18).toString("base64url");
   return `Aa1!${core}`;
