@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto";
 import { hash, verify } from "@node-rs/argon2";
 
+export {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  checkPasswordPolicy,
+  type PasswordPolicyResult,
+} from "@/lib/auth/password-policy";
+
 /**
  * Password hashing (Argon2id) and policy enforcement.
  *
@@ -29,30 +36,6 @@ export async function verifyPassword(hashString: string, password: string): Prom
     // Malformed hash, wrong algorithm, etc. Never throw to the caller.
     return false;
   }
-}
-
-export const PASSWORD_MIN_LENGTH = 12;
-export const PASSWORD_MAX_LENGTH = 200; // bound work; argon2 rejects huge inputs anyway
-
-export interface PasswordPolicyResult {
-  ok: boolean;
-  errors: string[];
-}
-
-/** Structural policy check: length + character-class complexity. */
-export function checkPasswordPolicy(password: string): PasswordPolicyResult {
-  const errors: string[] = [];
-  if (password.length < PASSWORD_MIN_LENGTH) {
-    errors.push(`Must be at least ${PASSWORD_MIN_LENGTH} characters.`);
-  }
-  if (password.length > PASSWORD_MAX_LENGTH) {
-    errors.push(`Must be at most ${PASSWORD_MAX_LENGTH} characters.`);
-  }
-  if (!/[a-z]/.test(password)) errors.push("Must include a lowercase letter.");
-  if (!/[A-Z]/.test(password)) errors.push("Must include an uppercase letter.");
-  if (!/[0-9]/.test(password)) errors.push("Must include a digit.");
-  if (!/[^A-Za-z0-9]/.test(password)) errors.push("Must include a symbol.");
-  return { ok: errors.length === 0, errors };
 }
 
 /**

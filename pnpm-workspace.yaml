@@ -2,7 +2,12 @@ allowBuilds:
   '@prisma/client': true
   '@prisma/engines': true
   esbuild: true
-  msw: set this to true or false
   prisma: true
   sharp: true
   unrs-resolver: true
+  msw: false
+
+# Dedupe @auth/core: next-auth beta.25 ships 0.41.x but @auth/prisma-adapter
+# pulls an older 0.37.x, which breaks adapter + JWT augmentation types.
+overrides:
+  '@auth/core': 0.41.2
