@@ -49,47 +49,53 @@ const providers: NextAuthConfig["providers"] = [
       backupCode: {},
     },
     async authorize(raw) {
-      const parsed = loginSchema.safeParse(raw);
-      if (!parsed.success) return null;
-      const { email, password, totp, backupCode } = parsed.data;
+      try {
+        const parsed = loginSchema.safeParse(raw);
+        if (!parsed.success) return null;
+        const { email, password, totp, backupCode } = parsed.data;
 
-      const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({ where: { email } });
 
-      if (!user || !user.passwordHash) {
-        await verifyPassword(await dummyHash(), password); // equalize timing
-        return null;
-      }
-      if (!user.isActive) return null;
-      if (isLocked(user)) return null;
-
-      const passwordOk = await verifyPassword(user.passwordHash, password);
-      if (!passwordOk) {
-        await registerFailedLogin(user.id);
-        return null;
-      }
-
-      // Second factor, if enabled.
-      if (user.mfaEnabled) {
-        let mfaOk = false;
-        if (totp && user.mfaSecret) {
-          mfaOk = verifyTotp(totp, decrypt(user.mfaSecret));
-        } else if (backupCode) {
-          mfaOk = await consumeBackupCode(user.id, backupCode);
+        if (!user || !user.passwordHash) {
+          await verifyPassword(await dummyHash(), password); // equalize timing
+          return null;
         }
-        if (!mfaOk) {
+        if (!user.isActive) return null;
+        if (isLocked(user)) return null;
+
+        const passwordOk = await verifyPassword(user.passwordHash, password);
+        if (!passwordOk) {
           await registerFailedLogin(user.id);
           return null;
         }
-      }
 
-      await registerSuccessfulLogin(user.id);
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        tokenVersion: user.tokenVersion,
-      };
+        // Second factor, if enabled.
+        if (user.mfaEnabled) {
+          let mfaOk = false;
+          if (totp && user.mfaSecret) {
+            mfaOk = verifyTotp(totp, decrypt(user.mfaSecret));
+          } else if (backupCode) {
+            mfaOk = await consumeBackupCode(user.id, backupCode);
+          }
+          if (!mfaOk) {
+            await registerFailedLogin(user.id);
+            return null;
+          }
+        }
+
+        await registerSuccessfulLogin(user.id);
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tokenVersion: user.tokenVersion,
+        };
+      } catch (e) {
+        // TEMP diagnostic: surface the real cause behind a generic CredentialsSignin.
+        console.error("[authorize] failure:", e instanceof Error ? e.message : e);
+        throw e;
+      }
     },
   }),
 ];
