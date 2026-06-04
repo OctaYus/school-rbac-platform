@@ -30,6 +30,7 @@ export async function createTodo(values: unknown): Promise<ActionResult> {
     const data = parse(createTodoSchema, values);
     await prisma.todo.create({
       data: {
+        organizationId: user.organizationId,
         userId: user.id,
         title: data.title,
         notes: data.notes,

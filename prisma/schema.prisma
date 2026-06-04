@@ -16,6 +16,41 @@ datasource db {
 }
 
 // ---------------------------------------------------------------------------
+// Tenancy
+// ---------------------------------------------------------------------------
+
+enum PlanTier {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+// A tenant. All domain data is scoped to an organization.
+model Organization {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  plan PlanTier @default(FREE)
+
+  // Billing (wired to Stripe later — nullable now to avoid a future migration).
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  subscriptionStatus   String?
+  trialEndsAt          DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  students  Student[]
+  sessions  Session[]
+  templates SessionTemplate[]
+  auditLogs AuditLog[]
+  todos     Todo[]
+}
+
+// ---------------------------------------------------------------------------
 // Identity & access
 // ---------------------------------------------------------------------------
 
@@ -27,12 +62,13 @@ enum Role {
 }
 
 model User {
-  id           String  @id @default(cuid())
-  email        String  @unique
-  passwordHash String?
-  name         String
-  role         Role
-  isActive     Boolean @default(true)
+  id             String  @id @default(cuid())
+  organizationId String
+  email          String  @unique
+  passwordHash   String?
+  name           String
+  role           Role
+  isActive       Boolean @default(true)
 
   // MFA (TOTP). mfaSecret is AES-256-GCM encrypted at the application layer.
   mfaSecret  String?
@@ -61,8 +97,10 @@ model User {
   backupCodes      BackupCode[]
   auditLogs        AuditLog[]
   todos            Todo[]
+  organization     Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([role])
+  @@index([organizationId])
 }
 
 enum TodoStatus {
@@ -80,18 +118,21 @@ enum TodoPriority {
 
 // Personal to-do items (private to each user).
 model Todo {
-  id        String       @id @default(cuid())
-  userId    String
-  title     String
-  notes     String?      @db.Text
-  dueDate   DateTime?
-  status    TodoStatus   @default(TODO)
-  priority  TodoPriority @default(NONE)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String       @id @default(cuid())
+  organizationId String
+  userId         String
+  title          String
+  notes          String?      @db.Text
+  dueDate        DateTime?
+  status         TodoStatus   @default(TODO)
+  priority       TodoPriority @default(NONE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([organizationId])
 }
 
 // MFA backup codes (one-time use). Stored hashed (argon2), never in plaintext.
@@ -160,19 +201,23 @@ enum StudentStatus {
 }
 
 model Student {
-  id         String        @id @default(cuid())
-  fullName   String
-  externalId String?       @unique
-  status     StudentStatus @default(ACTIVE)
-  notes      String?       @db.Text
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organizationId String
+  fullName       String
+  externalId     String?
+  status         StudentStatus @default(ACTIVE)
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   marks         Mark[]
   healthRecords HealthRecord[]
   assignments   StudentAssignment[]
+  organization  Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  @@unique([organizationId, externalId])
   @@index([status])
+  @@index([organizationId])
 }
 
 model StudentAssignment {
@@ -235,33 +280,39 @@ enum SessionStatus {
 }
 
 model SessionTemplate {
-  id              String   @id @default(cuid())
+  id              String       @id @default(cuid())
+  organizationId  String
   type            String
   defaultDuration Int
   createdById     String
-  createdAt       DateTime @default(now())
+  createdAt       DateTime     @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@unique([type])
+  @@unique([organizationId, type])
+  @@index([organizationId])
 }
 
 model Session {
-  id           String        @id @default(cuid())
-  teacherId    String
-  assignedById String
-  type         String
-  scheduledAt  DateTime
-  durationMin  Int
-  status       SessionStatus @default(SCHEDULED)
-  notes        String?       @db.Text
-  takenAt      DateTime?
-  teacher      User          @relation("TeacherSessions", fields: [teacherId], references: [id], onDelete: Cascade)
-  assignedBy   User          @relation("AssignedByUser", fields: [assignedById], references: [id], onDelete: Cascade)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  organizationId String
+  teacherId      String
+  assignedById   String
+  type           String
+  scheduledAt    DateTime
+  durationMin    Int
+  status         SessionStatus @default(SCHEDULED)
+  notes          String?       @db.Text
+  takenAt        DateTime?
+  teacher        User          @relation("TeacherSessions", fields: [teacherId], references: [id], onDelete: Cascade)
+  assignedBy     User          @relation("AssignedByUser", fields: [assignedById], references: [id], onDelete: Cascade)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   @@index([teacherId])
   @@index([scheduledAt])
   @@index([status])
+  @@index([organizationId])
 }
 
 // ---------------------------------------------------------------------------
@@ -269,18 +320,21 @@ model Session {
 // ---------------------------------------------------------------------------
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  actorId   String
-  action    String
-  entity    String
-  entityId  String
-  diff      Json?
-  ip        String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  actor     User     @relation(fields: [actorId], references: [id])
+  id             String       @id @default(cuid())
+  organizationId String
+  actorId        String
+  action         String
+  entity         String
+  entityId       String
+  diff           Json?
+  ip             String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+  actor          User         @relation(fields: [actorId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([actorId])
   @@index([entity, entityId])
   @@index([createdAt])
+  @@index([organizationId])
 }

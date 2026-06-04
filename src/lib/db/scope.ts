@@ -10,32 +10,31 @@ import { prisma } from "@/lib/db";
  * `scopedFor(user)` accessor that injects an ownership WHERE clause. Non-teacher
  * staff roles get an empty scope (full visibility per the capability matrix).
  */
-export type ScopeUser = { id: string; role: Role };
+export type ScopeUser = { id: string; role: Role; organizationId: string };
 
 const isTeacher = (u: ScopeUser) => u.role === Role.TEACHER;
 
+// Tenant isolation: every scoped query is bound to the user's organization, and
+// teachers are additionally bound to their assigned students / own sessions.
 export function studentScopeWhere(user: ScopeUser): Prisma.StudentWhereInput {
-  if (isTeacher(user)) {
-    return { assignments: { some: { teacherId: user.id } } };
-  }
-  return {};
+  const where: Prisma.StudentWhereInput = { organizationId: user.organizationId };
+  if (isTeacher(user)) where.assignments = { some: { teacherId: user.id } };
+  return where;
 }
 
 export function sessionScopeWhere(user: ScopeUser): Prisma.SessionWhereInput {
-  if (isTeacher(user)) {
-    return { teacherId: user.id };
-  }
-  return {};
+  const where: Prisma.SessionWhereInput = { organizationId: user.organizationId };
+  if (isTeacher(user)) where.teacherId = user.id;
+  return where;
 }
 
 /** Scope for records that hang off a student (marks, health records). */
-export function studentRelatedScopeWhere(
-  user: ScopeUser,
-): { student: Prisma.StudentWhereInput } | Record<string, never> {
-  if (isTeacher(user)) {
-    return { student: { assignments: { some: { teacherId: user.id } } } };
-  }
-  return {};
+export function studentRelatedScopeWhere(user: ScopeUser): {
+  student: Prisma.StudentWhereInput;
+} {
+  const student: Prisma.StudentWhereInput = { organizationId: user.organizationId };
+  if (isTeacher(user)) student.assignments = { some: { teacherId: user.id } };
+  return { student };
 }
 
 function and<T extends object>(base: T | undefined, scope: object): T {

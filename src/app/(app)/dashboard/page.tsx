@@ -64,7 +64,7 @@ export default async function DashboardPage() {
       </div>
 
       {user.role === Role.OWNER || user.role === Role.MANAGER ? (
-        <AdminView />
+        <AdminView organizationId={user.organizationId} />
       ) : user.role === Role.SUPERVISOR ? (
         <SupervisorView user={user} />
       ) : (
@@ -74,8 +74,8 @@ export default async function DashboardPage() {
   );
 }
 
-async function AdminView() {
-  const d = await getAdminDashboard();
+async function AdminView({ organizationId }: { organizationId: string }) {
+  const d = await getAdminDashboard(organizationId);
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

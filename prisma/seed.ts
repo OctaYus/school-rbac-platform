@@ -62,6 +62,13 @@ async function main() {
     { key: "TEACHER", email: "teacher@demo.school", name: "Tariq Teacher", role: Role.TEACHER },
   ];
 
+  // --- Demo organization (tenant) ---
+  const org = await prisma.organization.upsert({
+    where: { slug: "demo" },
+    update: {},
+    create: { name: "Demo Academy", slug: "demo", plan: "PRO" },
+  });
+
   const credentials: Array<{ role: string; email: string; password: string }> = [];
   const users: Record<string, { id: string }> = {};
 
@@ -72,6 +79,7 @@ async function main() {
       where: { email: spec.email },
       update: { name: spec.name, role: spec.role, passwordHash, isActive: true },
       create: {
+        organizationId: org.id,
         email: spec.email,
         name: spec.name,
         role: spec.role,
@@ -103,9 +111,10 @@ async function main() {
     const fullName = `${firstNames[i]} ${lastNames[i]}`;
     const externalId = `STU-${String(1000 + i)}`;
     const student = await prisma.student.upsert({
-      where: { externalId },
+      where: { organizationId_externalId: { organizationId: org.id, externalId } },
       update: { fullName },
       create: {
+        organizationId: org.id,
         fullName,
         externalId,
         status: i % 7 === 0 ? StudentStatus.SUSPENDED : StudentStatus.ACTIVE,
@@ -159,9 +168,9 @@ async function main() {
     { type: "Reading support", defaultDuration: 40 },
   ]) {
     await prisma.sessionTemplate.upsert({
-      where: { type: t.type },
+      where: { organizationId_type: { organizationId: org.id, type: t.type } },
       update: { defaultDuration: t.defaultDuration },
-      create: { ...t, createdById: users.SUPERVISOR.id },
+      create: { ...t, organizationId: org.id, createdById: users.SUPERVISOR.id },
     });
   }
 
@@ -180,6 +189,7 @@ async function main() {
   for (const s of sessionSeed) {
     await prisma.session.create({
       data: {
+        organizationId: org.id,
         teacherId: users.TEACHER.id,
         assignedById: users.SUPERVISOR.id,
         type: s.type,

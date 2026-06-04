@@ -34,24 +34,33 @@ export function assertCanAssignRole(actor: CurrentUser, targetRole: Role): void 
 }
 
 /**
- * Resource ownership: a TEACHER may only touch a student assigned to them.
- * Non-teacher staff pass through (their visibility is governed by capabilities).
+ * Resource ownership + tenant isolation: the student must belong to the user's
+ * organization, and a TEACHER may only touch a student assigned to them.
  */
 export async function assertStudentAccess(user: CurrentUser, studentId: string): Promise<void> {
-  if (!isTeacher(user.role)) return;
-  const assignment = await prisma.studentAssignment.findUnique({
-    where: { studentId_teacherId: { studentId, teacherId: user.id } },
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+      organizationId: user.organizationId,
+      ...(isTeacher(user.role) ? { assignments: { some: { teacherId: user.id } } } : {}),
+    },
     select: { id: true },
   });
-  if (!assignment) throw new ForbiddenError();
+  if (!student) throw new ForbiddenError();
 }
 
-/** A TEACHER may only mark/modify their own sessions. */
+/**
+ * The session must belong to the user's organization, and a TEACHER may only
+ * mark/modify their own sessions.
+ */
 export async function assertSessionOwnership(user: CurrentUser, sessionId: string): Promise<void> {
-  if (!isTeacher(user.role)) return;
-  const session = await prisma.session.findUnique({
-    where: { id: sessionId },
-    select: { teacherId: true },
+  const session = await prisma.session.findFirst({
+    where: {
+      id: sessionId,
+      organizationId: user.organizationId,
+      ...(isTeacher(user.role) ? { teacherId: user.id } : {}),
+    },
+    select: { id: true },
   });
-  if (!session || session.teacherId !== user.id) throw new ForbiddenError();
+  if (!session) throw new ForbiddenError();
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { LogOut, Settings } from "lucide-react";
-import type { Role } from "@prisma/client";
+import type { PlanTier, Role } from "@prisma/client";
 
 import { signOutAction } from "@/app/(app)/actions";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function UserMenu({ user }: { user: { name: string; email: string; role: Role } }) {
+export function UserMenu({
+  user,
+  orgName,
+  plan,
+}: {
+  user: { name: string; email: string; role: Role };
+  orgName: string;
+  plan: PlanTier;
+}) {
   const initials = user.name
     .split(" ")
     .map((n) => n[0])
@@ -37,7 +45,16 @@ export function UserMenu({ user }: { user: { name: string; email: string; role: 
         <DropdownMenuLabel>
           <div className="font-medium">{user.name}</div>
           <div className="text-muted-foreground text-xs font-normal">{user.email}</div>
-          <div className="text-primary mt-1 text-xs font-medium">{user.role}</div>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <span className="text-primary text-xs font-medium">{user.role}</span>
+            <span className="text-muted-foreground text-xs">·</span>
+            <span className="text-muted-foreground truncate text-xs" title={orgName}>
+              {orgName}
+            </span>
+          </div>
+          <div className="bg-muted text-muted-foreground mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">
+            {plan} plan
+          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>

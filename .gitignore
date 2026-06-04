@@ -55,3 +55,5 @@ prisma/*.db-journal
 *.log
 
 .vercel
+backups
+/backups

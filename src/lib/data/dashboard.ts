@@ -32,12 +32,13 @@ function countsByKey<T extends { _count: number }>(
 }
 
 // ---------------------------------------------------------------------------
-// Admin (OWNER / MANAGER)
+// Admin (OWNER / MANAGER) — scoped to the caller's organization
 // ---------------------------------------------------------------------------
-export async function getAdminDashboard() {
+export async function getAdminDashboard(organizationId: string) {
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+  const org = { organizationId };
 
   const [
     activeStudents,
@@ -50,18 +51,23 @@ export async function getAdminDashboard() {
     recentAudit,
     upcoming,
   ] = await Promise.all([
-    prisma.student.count({ where: { status: StudentStatus.ACTIVE } }),
-    prisma.student.count(),
-    prisma.session.count({ where: { scheduledAt: { gte: startOfDay(now), lte: endOfDay(now) } } }),
-    prisma.session.count({ where: { status: SessionStatus.SCHEDULED, scheduledAt: { lt: now } } }),
-    prisma.user.count({ where: { isActive: true } }),
-    prisma.student.groupBy({ by: ["status"], _count: true }),
+    prisma.student.count({ where: { ...org, status: StudentStatus.ACTIVE } }),
+    prisma.student.count({ where: org }),
+    prisma.session.count({
+      where: { ...org, scheduledAt: { gte: startOfDay(now), lte: endOfDay(now) } },
+    }),
+    prisma.session.count({
+      where: { ...org, status: SessionStatus.SCHEDULED, scheduledAt: { lt: now } },
+    }),
+    prisma.user.count({ where: { ...org, isActive: true } }),
+    prisma.student.groupBy({ by: ["status"], where: org, _count: true }),
     prisma.session.groupBy({
       by: ["status"],
-      where: { scheduledAt: { gte: weekStart, lte: weekEnd } },
+      where: { ...org, scheduledAt: { gte: weekStart, lte: weekEnd } },
       _count: true,
     }),
     prisma.auditLog.findMany({
+      where: org,
       orderBy: { createdAt: "desc" },
       take: 8,
       select: {
@@ -73,7 +79,7 @@ export async function getAdminDashboard() {
       },
     }),
     prisma.session.findMany({
-      where: { status: SessionStatus.SCHEDULED, scheduledAt: { gte: now } },
+      where: { ...org, status: SessionStatus.SCHEDULED, scheduledAt: { gte: now } },
       orderBy: { scheduledAt: "asc" },
       take: 5,
       select: {
@@ -112,35 +118,42 @@ export async function getAdminDashboard() {
 }
 
 // ---------------------------------------------------------------------------
-// Supervisor
+// Supervisor — scoped to the caller's organization
 // ---------------------------------------------------------------------------
 export async function getSupervisorDashboard(user: CurrentUser) {
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
   const since = subDays(now, 30);
+  const org = { organizationId: user.organizationId };
 
   const [scheduledThisWeek, sessionsToday, taken, missed, followUp, totalGrouped, takenGrouped] =
     await Promise.all([
       prisma.session.count({
-        where: { assignedById: user.id, scheduledAt: { gte: weekStart, lte: weekEnd } },
+        where: { ...org, assignedById: user.id, scheduledAt: { gte: weekStart, lte: weekEnd } },
       }),
       prisma.session.count({
-        where: { assignedById: user.id, scheduledAt: { gte: startOfDay(now), lte: endOfDay(now) } },
+        where: {
+          ...org,
+          assignedById: user.id,
+          scheduledAt: { gte: startOfDay(now), lte: endOfDay(now) },
+        },
       }),
-      prisma.session.count({ where: { status: SessionStatus.TAKEN, scheduledAt: { gte: since } } }),
       prisma.session.count({
-        where: { status: SessionStatus.MISSED, scheduledAt: { gte: since } },
+        where: { ...org, status: SessionStatus.TAKEN, scheduledAt: { gte: since } },
       }),
-      prisma.student.count({ where: { status: StudentStatus.SUSPENDED } }),
+      prisma.session.count({
+        where: { ...org, status: SessionStatus.MISSED, scheduledAt: { gte: since } },
+      }),
+      prisma.student.count({ where: { ...org, status: StudentStatus.SUSPENDED } }),
       prisma.session.groupBy({
         by: ["teacherId"],
-        where: { scheduledAt: { gte: since } },
+        where: { ...org, scheduledAt: { gte: since } },
         _count: true,
       }),
       prisma.session.groupBy({
         by: ["teacherId"],
-        where: { scheduledAt: { gte: since }, status: SessionStatus.TAKEN },
+        where: { ...org, scheduledAt: { gte: since }, status: SessionStatus.TAKEN },
         _count: true,
       }),
     ]);
@@ -149,7 +162,7 @@ export async function getSupervisorDashboard(user: CurrentUser) {
   const takens = countsByKey(takenGrouped, "teacherId");
   const teacherIds = Object.keys(totals);
   const teachers = await prisma.user.findMany({
-    where: { id: { in: teacherIds } },
+    where: { ...org, id: { in: teacherIds } },
     select: { id: true, name: true },
   });
   const teacherStats = teachers
@@ -177,7 +190,7 @@ export async function getSupervisorDashboard(user: CurrentUser) {
 }
 
 // ---------------------------------------------------------------------------
-// Teacher
+// Teacher — all reads go through scopedFor (org + assignment scoped)
 // ---------------------------------------------------------------------------
 export async function getTeacherDashboard(user: CurrentUser) {
   const now = new Date();

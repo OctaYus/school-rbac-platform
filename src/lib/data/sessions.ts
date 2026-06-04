@@ -38,16 +38,17 @@ export async function listSessions(user: CurrentUser, query: SessionListQuery) {
 
 export type SessionRow = Awaited<ReturnType<typeof listSessions>>[number];
 
-export async function getActiveTeachers() {
+export async function getActiveTeachers(organizationId: string) {
   return prisma.user.findMany({
-    where: { role: Role.TEACHER, isActive: true },
+    where: { organizationId, role: Role.TEACHER, isActive: true },
     orderBy: { name: "asc" },
     select: { id: true, name: true, email: true },
   });
 }
 
-export async function getSessionTemplates() {
+export async function getSessionTemplates(organizationId: string) {
   return prisma.sessionTemplate.findMany({
+    where: { organizationId },
     orderBy: { type: "asc" },
     select: { id: true, type: true, defaultDuration: true },
   });

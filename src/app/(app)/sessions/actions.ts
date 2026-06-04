@@ -32,8 +32,8 @@ export async function assignSession(values: unknown): Promise<ActionResult<{ id:
     const user = await requireCapability(Capability.SESSION_ASSIGN);
     const data = parse(assignSessionSchema, values);
 
-    const teacher = await prisma.user.findUnique({
-      where: { id: data.teacherId },
+    const teacher = await prisma.user.findFirst({
+      where: { id: data.teacherId, organizationId: user.organizationId },
       select: { id: true, role: true, isActive: true },
     });
     if (!teacher || !teacher.isActive || teacher.role !== Role.TEACHER) {
@@ -42,6 +42,7 @@ export async function assignSession(values: unknown): Promise<ActionResult<{ id:
 
     const session = await prisma.session.create({
       data: {
+        organizationId: user.organizationId,
         teacherId: data.teacherId,
         assignedById: user.id,
         type: data.type,
@@ -124,8 +125,8 @@ export async function deleteSession(values: unknown): Promise<ActionResult> {
     const user = await requireCapability(Capability.SESSION_ASSIGN);
     const data = parse(deleteSessionSchema, values);
 
-    const existing = await prisma.session.findUnique({
-      where: { id: data.id },
+    const existing = await prisma.session.findFirst({
+      where: { id: data.id, organizationId: user.organizationId },
       select: { id: true },
     });
     if (!existing) return fail("Session not found.");
@@ -149,11 +150,18 @@ export async function createSessionTemplate(values: unknown): Promise<ActionResu
     const user = await requireCapability(Capability.SESSION_TEMPLATE_CREATE);
     const data = parse(sessionTemplateSchema, values);
 
-    const existing = await prisma.sessionTemplate.findUnique({ where: { type: data.type } });
+    const existing = await prisma.sessionTemplate.findFirst({
+      where: { organizationId: user.organizationId, type: data.type },
+    });
     if (existing) return fail("A template with that type already exists.");
 
     const template = await prisma.sessionTemplate.create({
-      data: { type: data.type, defaultDuration: data.defaultDuration, createdById: user.id },
+      data: {
+        organizationId: user.organizationId,
+        type: data.type,
+        defaultDuration: data.defaultDuration,
+        createdById: user.id,
+      },
     });
     await writeAudit({
       actorId: user.id,

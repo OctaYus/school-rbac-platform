@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 
 export interface CurrentUser {
   id: string;
+  organizationId: string;
   email: string;
   name: string;
   role: Role;
@@ -32,6 +33,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     where: { id: userId },
     select: {
       id: true,
+      organizationId: true,
       email: true,
       name: true,
       role: true,

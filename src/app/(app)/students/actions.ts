@@ -38,6 +38,7 @@ export async function createStudent(values: unknown): Promise<ActionResult<{ id:
 
     const student = await prisma.student.create({
       data: {
+        organizationId: user.organizationId,
         fullName: data.fullName,
         externalId: data.externalId,
         status: data.status,
@@ -170,7 +171,9 @@ export async function deleteStudents(values: unknown): Promise<ActionResult<{ co
       await assertStudentAccess(user, id);
     }
 
-    const result = await prisma.student.deleteMany({ where: { id: { in: data.ids } } });
+    const result = await prisma.student.deleteMany({
+      where: { id: { in: data.ids }, organizationId: user.organizationId },
+    });
     await writeAudit({
       actorId: user.id,
       action: "student.bulkDelete",

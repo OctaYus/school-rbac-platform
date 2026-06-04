@@ -21,7 +21,7 @@ export const metadata = { title: "Users · Scholaris" };
 
 export default async function AdminUsersPage() {
   const actor = await requireCapability(Capability.USER_MANAGE);
-  const users = await listUsers();
+  const users = await listUsers(actor.organizationId);
 
   return (
     <>

@@ -41,6 +41,9 @@ export default async function LoginPage({
         )}
       </CardContent>
       <CardFooter className="text-muted-foreground justify-between text-sm">
+        <Link href="/signup" className="hover:text-foreground hover:underline">
+          Create an account
+        </Link>
         <Link href="/forgot-password" className="hover:text-foreground hover:underline">
           Forgot password?
         </Link>

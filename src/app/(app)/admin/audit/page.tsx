@@ -24,10 +24,10 @@ export default async function AuditPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireCapability(Capability.AUDIT_VIEW);
+  const user = await requireCapability(Capability.AUDIT_VIEW);
   const sp = await searchParams;
   const query = auditQuerySchema.parse(sp);
-  const { rows, total, page, pages } = await listAudit(query);
+  const { rows, total, page, pages } = await listAudit(user.organizationId, query);
 
   const pageHref = (p: number) => {
     const params = new URLSearchParams();

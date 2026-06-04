@@ -4,8 +4,9 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { AuditQuery } from "@/lib/validation/admin";
 
-export async function listUsers() {
+export async function listUsers(organizationId: string) {
   const users = await prisma.user.findMany({
+    where: { organizationId },
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
     select: {
       id: true,
@@ -24,8 +25,8 @@ export async function listUsers() {
 
 export const AUDIT_PAGE_SIZE = 25;
 
-export async function listAudit(query: AuditQuery) {
-  const where: Prisma.AuditLogWhereInput = {};
+export async function listAudit(organizationId: string, query: AuditQuery) {
+  const where: Prisma.AuditLogWhereInput = { organizationId };
   if (query.actorId) where.actorId = query.actorId;
   if (query.entity) where.entity = query.entity;
   if (query.action) where.action = { contains: query.action, mode: "insensitive" };

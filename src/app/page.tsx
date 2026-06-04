@@ -16,9 +16,14 @@ export default function HomePage() {
     <main className="flex flex-1 flex-col">
       <header className="flex items-center justify-between px-6 py-4">
         <Logo />
-        <Button asChild size="sm">
-          <Link href="/login">Sign in</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/login">Sign in</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/signup">Start free</Link>
+          </Button>
+        </div>
       </header>
 
       <section className="from-background to-muted/40 flex flex-1 flex-col items-center justify-center gap-6 bg-gradient-to-b px-6 py-20 text-center">
@@ -42,10 +47,10 @@ export default function HomePage() {
         </p>
         <div className="flex items-center gap-3">
           <Button asChild size="lg">
-            <Link href="/login">Get started</Link>
+            <Link href="/signup">Get started free</Link>
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link href="/dashboard">Go to dashboard</Link>
+            <Link href="/login">Sign in</Link>
           </Button>
         </div>
 

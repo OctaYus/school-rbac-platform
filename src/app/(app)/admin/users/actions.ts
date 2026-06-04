@@ -43,7 +43,13 @@ export async function inviteUser(values: unknown): Promise<ActionResult<{ invite
     if (existing) return fail("A user with that email already exists.");
 
     const user = await prisma.user.create({
-      data: { email: data.email, name: data.name, role: data.role, isActive: true },
+      data: {
+        organizationId: actor.organizationId,
+        email: data.email,
+        name: data.name,
+        role: data.role,
+        isActive: true,
+      },
     });
 
     const token = generateToken();
@@ -80,8 +86,8 @@ export async function resendInvite(values: unknown): Promise<ActionResult<{ invi
     const actor = await requireCapability(Capability.USER_MANAGE);
     const data = parse(userIdSchema, values);
 
-    const target = await prisma.user.findUnique({
-      where: { id: data.id },
+    const target = await prisma.user.findFirst({
+      where: { id: data.id, organizationId: actor.organizationId },
       select: { email: true, role: true, passwordHash: true },
     });
     if (!target) return fail("User not found.");
@@ -127,7 +133,10 @@ export async function setUserActive(values: unknown): Promise<ActionResult> {
     const data = parse(setActiveSchema, values);
     if (data.id === actor.id) return fail("You cannot change your own account status.");
 
-    const target = await prisma.user.findUnique({ where: { id: data.id }, select: { role: true } });
+    const target = await prisma.user.findFirst({
+      where: { id: data.id, organizationId: actor.organizationId },
+      select: { role: true },
+    });
     if (!target) return fail("User not found.");
     assertCanActOn(actor, target.role);
 
@@ -158,7 +167,10 @@ export async function changeUserRole(values: unknown): Promise<ActionResult> {
     const data = parse(changeRoleSchema, values);
     if (data.id === actor.id) return fail("You cannot change your own role.");
 
-    const target = await prisma.user.findUnique({ where: { id: data.id }, select: { role: true } });
+    const target = await prisma.user.findFirst({
+      where: { id: data.id, organizationId: actor.organizationId },
+      select: { role: true },
+    });
     if (!target) return fail("User not found.");
     assertCanActOn(actor, target.role); // protect existing OWNERs
     assertCanAssignRole(actor, data.role); // protect new role assignment
@@ -185,6 +197,11 @@ export async function forceLogoutUser(values: unknown): Promise<ActionResult> {
   try {
     const actor = await requireCapability(Capability.USER_MANAGE);
     const data = parse(userIdSchema, values);
+    const target = await prisma.user.findFirst({
+      where: { id: data.id, organizationId: actor.organizationId },
+      select: { id: true },
+    });
+    if (!target) return fail("User not found.");
     await prisma.user.update({
       where: { id: data.id },
       data: { tokenVersion: { increment: 1 } },
@@ -206,7 +223,10 @@ export async function resetUserMfa(values: unknown): Promise<ActionResult> {
   try {
     const actor = await requireCapability(Capability.USER_MANAGE);
     const data = parse(userIdSchema, values);
-    const target = await prisma.user.findUnique({ where: { id: data.id }, select: { role: true } });
+    const target = await prisma.user.findFirst({
+      where: { id: data.id, organizationId: actor.organizationId },
+      select: { role: true },
+    });
     if (!target) return fail("User not found.");
     assertCanActOn(actor, target.role);
 

@@ -7,8 +7,11 @@ import { AssignForm } from "@/components/sessions/assign-form";
 export const metadata = { title: "Assign session · Scholaris" };
 
 export default async function AssignSessionPage() {
-  await requireCapability(Capability.SESSION_ASSIGN);
-  const [teachers, templates] = await Promise.all([getActiveTeachers(), getSessionTemplates()]);
+  const user = await requireCapability(Capability.SESSION_ASSIGN);
+  const [teachers, templates] = await Promise.all([
+    getActiveTeachers(user.organizationId),
+    getSessionTemplates(user.organizationId),
+  ]);
 
   return (
     <>

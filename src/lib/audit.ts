@@ -20,9 +20,18 @@ export interface AuditEntry {
 }
 
 export async function writeAudit(entry: AuditEntry): Promise<void> {
-  const [ip, userAgent] = await Promise.all([getClientIp(), getUserAgent()]);
+  const [ip, userAgent, actor] = await Promise.all([
+    getClientIp(),
+    getUserAgent(),
+    prisma.user.findUnique({
+      where: { id: entry.actorId },
+      select: { organizationId: true },
+    }),
+  ]);
+  if (!actor) return; // actor must exist to attribute the event to a tenant
   await prisma.auditLog.create({
     data: {
+      organizationId: actor.organizationId,
       actorId: entry.actorId,
       action: entry.action,
       entity: entry.entity,
