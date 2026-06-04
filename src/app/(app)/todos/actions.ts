@@ -9,7 +9,12 @@ import { ValidationError } from "@/lib/errors";
 import { type ActionResult, fail, handleActionError, ok } from "@/lib/action-result";
 import { TodoStatus } from "@prisma/client";
 
-import { createTodoSchema, deleteTodoSchema, setTodoStatusSchema } from "@/lib/validation/todo";
+import {
+  createTodoSchema,
+  deleteTodoSchema,
+  setTodoStatusSchema,
+  updateTodoSchema,
+} from "@/lib/validation/todo";
 
 function parse<S extends z.ZodTypeAny>(schema: S, values: unknown): z.infer<S> {
   const result = schema.safeParse(values);
@@ -24,8 +29,37 @@ export async function createTodo(values: unknown): Promise<ActionResult> {
     const user = await requireUser();
     const data = parse(createTodoSchema, values);
     await prisma.todo.create({
-      data: { userId: user.id, title: data.title, notes: data.notes, dueDate: data.dueDate },
+      data: {
+        userId: user.id,
+        title: data.title,
+        notes: data.notes,
+        dueDate: data.dueDate,
+        status: data.status,
+        priority: data.priority,
+      },
     });
+    revalidatePath("/todos");
+    return ok();
+  } catch (e) {
+    return handleActionError(e);
+  }
+}
+
+export async function updateTodo(values: unknown): Promise<ActionResult> {
+  try {
+    const user = await requireUser();
+    const data = parse(updateTodoSchema, values);
+    const result = await prisma.todo.updateMany({
+      where: { id: data.id, userId: user.id },
+      data: {
+        title: data.title,
+        notes: data.notes,
+        dueDate: data.dueDate,
+        status: data.status,
+        priority: data.priority,
+      },
+    });
+    if (result.count === 0) return fail("Task not found.");
     revalidatePath("/todos");
     return ok();
   } catch (e) {

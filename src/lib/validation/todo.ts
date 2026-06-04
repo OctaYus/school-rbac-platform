@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TodoStatus } from "@prisma/client";
+import { TodoPriority, TodoStatus } from "@prisma/client";
 
 const cuid = z.string().min(1).max(40);
 
@@ -18,6 +18,27 @@ export const createTodoSchema = z
       .optional()
       .transform((v) => (v ? new Date(v) : undefined))
       .refine((v) => v === undefined || !Number.isNaN(v.getTime()), "Invalid date."),
+    status: z.nativeEnum(TodoStatus).optional().default(TodoStatus.TODO),
+    priority: z.nativeEnum(TodoPriority).optional().default(TodoPriority.NONE),
+  })
+  .strict();
+
+export const updateTodoSchema = z
+  .object({
+    id: cuid,
+    title: z.string().trim().min(1, "Required.").max(200),
+    notes: z
+      .string()
+      .trim()
+      .max(2000)
+      .transform((v) => (v === "" ? null : v)),
+    dueDate: z
+      .string()
+      .trim()
+      .transform((v) => (v ? new Date(v) : null))
+      .refine((v) => v === null || !Number.isNaN(v.getTime()), "Invalid date."),
+    status: z.nativeEnum(TodoStatus),
+    priority: z.nativeEnum(TodoPriority),
   })
   .strict();
 
