@@ -5,6 +5,7 @@ import { Capability } from "@/lib/auth/permissions";
 import { listUsers } from "@/lib/data/admin";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
+import { ActiveBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -51,11 +52,7 @@ export default async function AdminUsersPage() {
                   <Badge variant="secondary">{u.role}</Badge>
                 </TableCell>
                 <TableCell>
-                  {u.isActive ? (
-                    <Badge>Active</Badge>
-                  ) : (
-                    <Badge variant="destructive">Disabled</Badge>
-                  )}
+                  <ActiveBadge active={u.isActive} />
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {u.mfaEnabled ? "On" : "Off"}

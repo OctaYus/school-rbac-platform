@@ -7,7 +7,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import type { z } from "zod";
 
-import { changePassword, updateProfile } from "@/app/(app)/account/actions";
+import {
+  changePassword,
+  confirmEmailChange,
+  requestEmailChange,
+  updateProfile,
+} from "@/app/(app)/account/actions";
 import { signOutAction } from "@/app/(app)/actions";
 import { changePasswordSchema, updateProfileSchema } from "@/lib/validation/account";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password-policy";
@@ -15,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function ProfileForm({ initialName, email }: { initialName: string; email: string }) {
+export function ProfileForm({ initialName }: { initialName: string }) {
   const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -44,10 +49,6 @@ export function ProfileForm({ initialName, email }: { initialName: string; email
       {err && <p className="text-destructive text-sm">{err}</p>}
       {msg && <p className="text-muted-foreground text-sm">{msg}</p>}
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" value={email} disabled readOnly />
-      </div>
-      <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input id="name" {...register("name")} />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
@@ -55,6 +56,106 @@ export function ProfileForm({ initialName, email }: { initialName: string; email
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}
         Save profile
+      </Button>
+    </form>
+  );
+}
+
+export function EmailChangeForm({ currentEmail }: { currentEmail: string }) {
+  const [step, setStep] = useState<"request" | "confirm" | "done">("request");
+  const [newEmail, setNewEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function onRequest(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setPending(true);
+    const res = await requestEmailChange({ newEmail });
+    setPending(false);
+    if (res.ok) setStep("confirm");
+    else setErr(res.error);
+  }
+
+  async function onConfirm(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setPending(true);
+    const res = await confirmEmailChange({ newEmail, code });
+    setPending(false);
+    if (res.ok) {
+      setStep("done");
+      setTimeout(() => signOutAction(), 1500);
+    } else setErr(res.error);
+  }
+
+  if (step === "done") {
+    return (
+      <p role="status" className="bg-muted rounded-md border px-3 py-2 text-sm">
+        Email updated. Signing you out — sign in with your new email…
+      </p>
+    );
+  }
+
+  if (step === "confirm") {
+    return (
+      <form onSubmit={onConfirm} className="space-y-4">
+        {err && <p className="text-destructive text-sm">{err}</p>}
+        <p className="text-muted-foreground text-sm">
+          We sent a 6-digit code to <span className="text-foreground font-medium">{newEmail}</span>.
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="code">Verification code</Label>
+          <Input
+            id="code"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            placeholder="123456"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={pending}>
+            {pending && <Loader2 className="animate-spin" />}
+            Confirm change
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setStep("request");
+              setCode("");
+              setErr(null);
+            }}
+          >
+            Back
+          </Button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={onRequest} className="space-y-4">
+      {err && <p className="text-destructive text-sm">{err}</p>}
+      <div className="space-y-2">
+        <Label>Current email</Label>
+        <Input value={currentEmail} disabled readOnly />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="newEmail">New email</Label>
+        <Input
+          id="newEmail"
+          type="email"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value)}
+        />
+      </div>
+      <Button type="submit" disabled={pending || !newEmail}>
+        {pending && <Loader2 className="animate-spin" />}
+        Send verification code
       </Button>
     </form>
   );

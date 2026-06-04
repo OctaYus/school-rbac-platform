@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { getStudentDetail } from "@/lib/data/students";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
+import { StudentStatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,7 +59,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
-                  <Badge>{student.status}</Badge>
+                  <StudentStatusBadge status={student.status} />
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">External ID</span>

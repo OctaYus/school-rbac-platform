@@ -19,6 +19,7 @@ import {
 } from "@/lib/data/dashboard";
 import { StatCard } from "@/components/app/stat-card";
 import { Badge } from "@/components/ui/badge";
+import { StudentStatusBadge } from "@/components/ui/status-badge";
 import {
   ActivityFeed,
   BarBreakdown,
@@ -43,14 +44,6 @@ const SESSION_COLOR: Record<string, string> = {
   RESCHEDULED: "bg-amber-500",
   CANCELLED: "bg-zinc-400",
 };
-const STUDENT_BADGE: Record<StudentStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  ACTIVE: "default",
-  INACTIVE: "secondary",
-  GRADUATED: "outline",
-  SUSPENDED: "destructive",
-  ARCHIVED: "secondary",
-};
-
 export default async function DashboardPage() {
   const user = await requireUser();
 
@@ -254,7 +247,7 @@ async function TeacherView({ user }: { user: Parameters<typeof getTeacherDashboa
                   <Link href={`/students/${s.id}`} className="text-sm font-medium hover:underline">
                     {s.fullName}
                   </Link>
-                  <Badge variant={STUDENT_BADGE[s.status]}>{s.status}</Badge>
+                  <StudentStatusBadge status={s.status} />
                 </li>
               ))}
             </ul>

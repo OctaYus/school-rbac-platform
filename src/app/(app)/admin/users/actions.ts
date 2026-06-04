@@ -11,6 +11,7 @@ import { writeAudit } from "@/lib/audit";
 import { ForbiddenError, ValidationError } from "@/lib/errors";
 import { type ActionResult, fail, handleActionError, ok } from "@/lib/action-result";
 import { generateToken, hashToken, INVITE_PREFIX, INVITE_TTL_MS } from "@/lib/auth/tokens";
+import { sendInviteEmail } from "@/lib/email/mailer";
 import {
   changeRoleSchema,
   inviteUserSchema,
@@ -63,8 +64,12 @@ export async function inviteUser(values: unknown): Promise<ActionResult<{ invite
     });
 
     const base = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const inviteUrl = `${base}/accept-invite/${token}`;
+    // Email the invite (no-op if SMTP unconfigured); the link is also returned
+    // so the admin can copy it directly.
+    await sendInviteEmail(data.email, inviteUrl);
     revalidatePath("/admin/users");
-    return ok({ inviteUrl: `${base}/accept-invite/${token}` });
+    return ok({ inviteUrl });
   } catch (e) {
     return handleActionError(e);
   }

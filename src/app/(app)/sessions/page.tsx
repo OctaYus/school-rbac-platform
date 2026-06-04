@@ -8,8 +8,8 @@ import { Capability, can } from "@/lib/auth/permissions";
 import { listSessions } from "@/lib/data/sessions";
 import { sessionListQuerySchema } from "@/lib/validation/session";
 import { PageHeader } from "@/components/app/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SessionStatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -22,14 +22,6 @@ import { MarkSessionActions } from "@/components/sessions/mark-session-actions";
 import { DeleteSessionButton } from "@/components/sessions/delete-session-button";
 
 export const metadata = { title: "Sessions · Scholaris" };
-
-const STATUS_VARIANT: Record<SessionStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  SCHEDULED: "default",
-  TAKEN: "secondary",
-  MISSED: "destructive",
-  RESCHEDULED: "outline",
-  CANCELLED: "secondary",
-};
 
 const SCOPES = ["upcoming", "past", "all"] as const;
 
@@ -104,7 +96,7 @@ export default async function SessionsPage({
                     <TableCell>{s.type}</TableCell>
                     {isStaff && <TableCell>{s.teacher.name}</TableCell>}
                     <TableCell>
-                      <Badge variant={STATUS_VARIANT[s.status]}>{s.status}</Badge>
+                      <SessionStatusBadge status={s.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

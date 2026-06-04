@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Download, Plus } from "lucide-react";
 import { StudentStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
@@ -46,6 +46,11 @@ export default async function StudentsPage({
         title="Students"
         description={user.role === "TEACHER" ? "Students assigned to you" : `${total} students`}
       >
+        <Button asChild variant="outline">
+          <a href="/api/students/export">
+            <Download className="size-4" /> Export
+          </a>
+        </Button>
         <Button asChild>
           <Link href="/students/new">
             <Plus className="size-4" /> New student

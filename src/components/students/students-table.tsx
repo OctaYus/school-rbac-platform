@@ -7,8 +7,8 @@ import { Loader2, Trash2 } from "lucide-react";
 import type { StudentStatus } from "@prisma/client";
 
 import { deleteStudents } from "@/app/(app)/students/actions";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StudentStatusBadge } from "@/components/ui/status-badge";
 import {
   Table,
   TableBody,
@@ -36,14 +36,6 @@ export interface StudentRow {
   marksCount: number;
   healthCount: number;
 }
-
-const STATUS_VARIANT: Record<StudentStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  ACTIVE: "default",
-  INACTIVE: "secondary",
-  GRADUATED: "outline",
-  SUSPENDED: "destructive",
-  ARCHIVED: "secondary",
-};
 
 function Check({
   checked,
@@ -168,7 +160,7 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{s.externalId ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={STATUS_VARIANT[s.status]}>{s.status}</Badge>
+                    <StudentStatusBadge status={s.status} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-right">
                     {s.marksCount} marks · {s.healthCount} health
