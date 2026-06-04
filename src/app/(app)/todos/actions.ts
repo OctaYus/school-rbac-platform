@@ -7,7 +7,9 @@ import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/auth/guards";
 import { ValidationError } from "@/lib/errors";
 import { type ActionResult, fail, handleActionError, ok } from "@/lib/action-result";
-import { createTodoSchema, deleteTodoSchema, toggleTodoSchema } from "@/lib/validation/todo";
+import { TodoStatus } from "@prisma/client";
+
+import { createTodoSchema, deleteTodoSchema, setTodoStatusSchema } from "@/lib/validation/todo";
 
 function parse<S extends z.ZodTypeAny>(schema: S, values: unknown): z.infer<S> {
   const result = schema.safeParse(values);
@@ -31,14 +33,14 @@ export async function createTodo(values: unknown): Promise<ActionResult> {
   }
 }
 
-export async function toggleTodo(values: unknown): Promise<ActionResult> {
+export async function setTodoStatus(values: unknown): Promise<ActionResult> {
   try {
     const user = await requireUser();
-    const data = parse(toggleTodoSchema, values);
+    const data = parse(setTodoStatusSchema, values);
     // Ownership enforced by the userId filter — users can only touch their own.
     const result = await prisma.todo.updateMany({
       where: { id: data.id, userId: user.id },
-      data: { completed: data.completed },
+      data: { status: data.status },
     });
     if (result.count === 0) return fail("Task not found.");
     revalidatePath("/todos");
@@ -63,7 +65,7 @@ export async function deleteTodo(values: unknown): Promise<ActionResult> {
 export async function clearCompletedTodos(): Promise<ActionResult> {
   try {
     const user = await requireUser();
-    await prisma.todo.deleteMany({ where: { userId: user.id, completed: true } });
+    await prisma.todo.deleteMany({ where: { userId: user.id, status: TodoStatus.DONE } });
     revalidatePath("/todos");
     return ok();
   } catch (e) {

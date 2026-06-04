@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, MoreHorizontal, Power, ShieldOff, UserCog } from "lucide-react";
+import { Copy, LogOut, MoreHorizontal, Power, Send, ShieldOff, UserCog } from "lucide-react";
 import { Role } from "@prisma/client";
 
 import {
   changeUserRole,
   forceLogoutUser,
+  resendInvite,
   resetUserMfa,
   setUserActive,
 } from "@/app/(app)/admin/users/actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +25,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -30,7 +33,7 @@ import {
 
 interface Props {
   actorRole: Role;
-  user: { id: string; role: Role; isActive: boolean; mfaEnabled: boolean };
+  user: { id: string; role: Role; isActive: boolean; mfaEnabled: boolean; pending: boolean };
   isSelf: boolean;
 }
 
@@ -39,6 +42,7 @@ export function UserActions({ actorRole, user, isSelf }: Props) {
   const [roleOpen, setRoleOpen] = useState(false);
   const [newRole, setNewRole] = useState<Role>(user.role);
   const [busy, setBusy] = useState(false);
+  const [resentUrl, setResentUrl] = useState<string | null>(null);
 
   // OWNER targets can only be managed by an OWNER.
   const canManage = !(user.role === Role.OWNER && actorRole !== Role.OWNER);
@@ -57,6 +61,16 @@ export function UserActions({ actorRole, user, isSelf }: Props) {
     else alert(res.error ?? "Action failed.");
   }
 
+  async function onResend() {
+    setBusy(true);
+    const res = await resendInvite({ id: user.id });
+    setBusy(false);
+    if (res.ok) {
+      setResentUrl((res.data as { inviteUrl: string }).inviteUrl);
+      router.refresh();
+    } else alert(res.error ?? "Couldn't resend invite.");
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -67,6 +81,11 @@ export function UserActions({ actorRole, user, isSelf }: Props) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Manage</DropdownMenuLabel>
+          {user.pending && (
+            <DropdownMenuItem disabled={!canManage || busy} onClick={onResend}>
+              <Send /> Resend invitation
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             disabled={isSelf || !canManage || busy}
             onClick={() => run(() => setUserActive({ id: user.id, isActive: !user.isActive }))}
@@ -127,6 +146,29 @@ export function UserActions({ actorRole, user, isSelf }: Props) {
             >
               Save
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={resentUrl !== null} onOpenChange={(o) => !o && setResentUrl(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invitation re-sent</DialogTitle>
+            <DialogDescription>
+              A fresh activation email was sent. You can also copy the link (valid 72 hours).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-2">
+            <Input readOnly value={resentUrl ?? ""} onFocus={(e) => e.currentTarget.select()} />
+            <Button
+              variant="outline"
+              onClick={() => resentUrl && navigator.clipboard?.writeText(resentUrl)}
+            >
+              <Copy className="size-4" />
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setResentUrl(null)}>Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

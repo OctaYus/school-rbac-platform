@@ -52,7 +52,13 @@ export default async function AdminUsersPage() {
                   <Badge variant="secondary">{u.role}</Badge>
                 </TableCell>
                 <TableCell>
-                  <ActiveBadge active={u.isActive} />
+                  {u.pending ? (
+                    <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-600/20 ring-inset dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/25">
+                      Invited
+                    </span>
+                  ) : (
+                    <ActiveBadge active={u.isActive} />
+                  )}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {u.mfaEnabled ? "On" : "Off"}
@@ -70,6 +76,7 @@ export default async function AdminUsersPage() {
                       role: u.role,
                       isActive: u.isActive,
                       mfaEnabled: u.mfaEnabled,
+                      pending: u.pending,
                     }}
                     isSelf={u.id === actor.id}
                   />

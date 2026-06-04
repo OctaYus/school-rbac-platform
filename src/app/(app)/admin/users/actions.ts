@@ -75,6 +75,52 @@ export async function inviteUser(values: unknown): Promise<ActionResult<{ invite
   }
 }
 
+export async function resendInvite(values: unknown): Promise<ActionResult<{ inviteUrl: string }>> {
+  try {
+    const actor = await requireCapability(Capability.USER_MANAGE);
+    const data = parse(userIdSchema, values);
+
+    const target = await prisma.user.findUnique({
+      where: { id: data.id },
+      select: { email: true, role: true, passwordHash: true },
+    });
+    if (!target) return fail("User not found.");
+    assertCanActOn(actor, target.role);
+    if (target.passwordHash) {
+      return fail("This user has already activated their account.");
+    }
+
+    // Invalidate any previous invite for this email and issue a fresh one.
+    const token = generateToken();
+    await prisma.verificationToken.deleteMany({
+      where: { identifier: `${INVITE_PREFIX}${target.email}` },
+    });
+    await prisma.verificationToken.create({
+      data: {
+        identifier: `${INVITE_PREFIX}${target.email}`,
+        token: hashToken(token),
+        expires: new Date(Date.now() + INVITE_TTL_MS),
+      },
+    });
+
+    const base = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+    const inviteUrl = `${base}/accept-invite/${token}`;
+    await sendInviteEmail(target.email, inviteUrl);
+
+    await writeAudit({
+      actorId: actor.id,
+      action: "user.reinvite",
+      entity: "User",
+      entityId: data.id,
+      diff: { email: target.email },
+    });
+    revalidatePath("/admin/users");
+    return ok({ inviteUrl });
+  } catch (e) {
+    return handleActionError(e);
+  }
+}
+
 export async function setUserActive(values: unknown): Promise<ActionResult> {
   try {
     const actor = await requireCapability(Capability.USER_MANAGE);

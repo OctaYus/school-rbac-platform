@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import type { AuditQuery } from "@/lib/validation/admin";
 
 export async function listUsers() {
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     orderBy: [{ isActive: "desc" }, { name: "asc" }],
     select: {
       id: true,
@@ -15,8 +15,11 @@ export async function listUsers() {
       isActive: true,
       mfaEnabled: true,
       lastLoginAt: true,
+      passwordHash: true,
     },
   });
+  // `pending` = invited but not yet activated. Never expose the hash itself.
+  return users.map(({ passwordHash, ...u }) => ({ ...u, pending: !passwordHash }));
 }
 
 export const AUDIT_PAGE_SIZE = 25;

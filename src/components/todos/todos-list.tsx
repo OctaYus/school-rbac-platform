@@ -4,10 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format, isPast } from "date-fns";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { TodoStatus } from "@prisma/client";
 
-import { clearCompletedTodos, createTodo, deleteTodo, toggleTodo } from "@/app/(app)/todos/actions";
+import {
+  clearCompletedTodos,
+  createTodo,
+  deleteTodo,
+  setTodoStatus,
+} from "@/app/(app)/todos/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export interface TodoItem {
@@ -15,8 +22,20 @@ export interface TodoItem {
   title: string;
   notes: string | null;
   dueDate: string | null; // ISO
-  completed: boolean;
+  status: TodoStatus;
 }
+
+const COLUMNS: { key: TodoStatus; label: string; dot: string }[] = [
+  { key: TodoStatus.TODO, label: "To do", dot: "bg-zinc-400" },
+  { key: TodoStatus.IN_PROGRESS, label: "In progress", dot: "bg-amber-500" },
+  { key: TodoStatus.DONE, label: "Done", dot: "bg-emerald-500" },
+];
+
+const STATUS_LABEL: Record<TodoStatus, string> = {
+  TODO: "To do",
+  IN_PROGRESS: "In progress",
+  DONE: "Done",
+};
 
 export function TodosList({ todos }: { todos: TodoItem[] }) {
   const router = useRouter();
@@ -25,9 +44,6 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const pending = todos.filter((t) => !t.completed);
-  const completed = todos.filter((t) => t.completed);
 
   async function onAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -43,9 +59,9 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
     } else setError(res.error);
   }
 
-  async function onToggle(id: string, completed: boolean) {
+  async function changeStatus(id: string, status: TodoStatus) {
     setBusyId(id);
-    await toggleTodo({ id, completed });
+    await setTodoStatus({ id, status });
     setBusyId(null);
     router.refresh();
   }
@@ -57,47 +73,7 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
     router.refresh();
   }
 
-  function Row({ t }: { t: TodoItem }) {
-    const overdue = t.dueDate && !t.completed && isPast(new Date(t.dueDate));
-    return (
-      <li className="hover:bg-muted/40 flex items-center gap-3 rounded-lg px-2 py-2 transition-colors">
-        <input
-          type="checkbox"
-          checked={t.completed}
-          onChange={() => onToggle(t.id, !t.completed)}
-          disabled={busyId === t.id}
-          aria-label={t.completed ? "Mark as not done" : "Mark as done"}
-          className="border-input size-4 cursor-pointer rounded border accent-[var(--primary)]"
-        />
-        <div className="min-w-0 flex-1">
-          <p
-            className={cn("truncate text-sm", t.completed && "text-muted-foreground line-through")}
-          >
-            {t.title}
-          </p>
-          {t.dueDate && (
-            <p className={cn("text-xs", overdue ? "text-rose-500" : "text-muted-foreground")}>
-              Due {format(new Date(t.dueDate), "MMM d, yyyy")}
-              {overdue ? " · overdue" : ""}
-            </p>
-          )}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Delete task"
-          onClick={() => onDelete(t.id)}
-          disabled={busyId === t.id}
-        >
-          {busyId === t.id ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Trash2 className="text-muted-foreground hover:text-destructive size-4" />
-          )}
-        </Button>
-      </li>
-    );
-  }
+  const doneCount = todos.filter((t) => t.status === TodoStatus.DONE).length;
 
   return (
     <div className="space-y-6">
@@ -117,49 +93,101 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
         />
         <Button type="submit" disabled={adding || !title.trim()}>
           {adding ? <Loader2 className="animate-spin" /> : <Plus className="size-4" />}
-          Add
+          Add task
         </Button>
       </form>
       {error && <p className="text-destructive text-sm">{error}</p>}
 
-      <div>
-        <h2 className="text-muted-foreground mb-1 text-xs font-semibold tracking-wider uppercase">
-          To do ({pending.length})
-        </h2>
-        {pending.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-sm">Nothing to do. Nice. 🎉</p>
-        ) : (
-          <ul className="-mx-2">
-            {pending.map((t) => (
-              <Row key={t.id} t={t} />
-            ))}
-          </ul>
-        )}
-      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {COLUMNS.map((col) => {
+          const items = todos.filter((t) => t.status === col.key);
+          return (
+            <div key={col.key} className="bg-muted/30 space-y-3 rounded-xl border p-3">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="flex items-center gap-2 text-sm font-semibold">
+                  <span className={cn("size-2 rounded-full", col.dot)} />
+                  {col.label}
+                  <span className="text-muted-foreground font-normal">{items.length}</span>
+                </h2>
+                {col.key === TodoStatus.DONE && doneCount > 0 && (
+                  <button
+                    onClick={async () => {
+                      await clearCompletedTodos();
+                      router.refresh();
+                    }}
+                    className="text-muted-foreground hover:text-foreground text-xs"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
 
-      {completed.length > 0 && (
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <h2 className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-              Completed ({completed.length})
-            </h2>
-            <button
-              onClick={async () => {
-                await clearCompletedTodos();
-                router.refresh();
-              }}
-              className="text-muted-foreground hover:text-foreground text-xs"
-            >
-              Clear completed
-            </button>
-          </div>
-          <ul className="-mx-2">
-            {completed.map((t) => (
-              <Row key={t.id} t={t} />
-            ))}
-          </ul>
-        </div>
-      )}
+              <div className="space-y-2">
+                {items.length === 0 ? (
+                  <p className="text-muted-foreground px-1 py-6 text-center text-xs">No tasks.</p>
+                ) : (
+                  items.map((t) => {
+                    const overdue =
+                      t.dueDate && t.status !== TodoStatus.DONE && isPast(new Date(t.dueDate));
+                    return (
+                      <Card key={t.id} className="space-y-2 p-3 shadow-sm">
+                        <div className="flex items-start justify-between gap-2">
+                          <p
+                            className={cn(
+                              "text-sm font-medium",
+                              t.status === TodoStatus.DONE && "text-muted-foreground line-through",
+                            )}
+                          >
+                            {t.title}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="-mt-1 -mr-1 size-7 shrink-0"
+                            aria-label="Delete task"
+                            onClick={() => onDelete(t.id)}
+                            disabled={busyId === t.id}
+                          >
+                            {busyId === t.id ? (
+                              <Loader2 className="size-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="text-muted-foreground hover:text-destructive size-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                        {t.dueDate && (
+                          <p
+                            className={cn(
+                              "text-xs",
+                              overdue ? "text-rose-500" : "text-muted-foreground",
+                            )}
+                          >
+                            Due {format(new Date(t.dueDate), "MMM d")}
+                            {overdue ? " · overdue" : ""}
+                          </p>
+                        )}
+                        <select
+                          value={t.status}
+                          disabled={busyId === t.id}
+                          onChange={(e) => changeStatus(t.id, e.target.value as TodoStatus)}
+                          aria-label="Status"
+                          className="border-input h-7 w-full rounded-md border bg-transparent px-2 text-xs"
+                        >
+                          {COLUMNS.map((c) => (
+                            <option key={c.key} value={c.key}>
+                              {STATUS_LABEL[c.key]}
+                            </option>
+                          ))}
+                        </select>
+                      </Card>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

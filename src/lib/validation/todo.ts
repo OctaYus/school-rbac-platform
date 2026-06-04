@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TodoStatus } from "@prisma/client";
 
 const cuid = z.string().min(1).max(40);
 
@@ -20,5 +21,8 @@ export const createTodoSchema = z
   })
   .strict();
 
-export const toggleTodoSchema = z.object({ id: cuid, completed: z.boolean() }).strict();
+export const setTodoStatusSchema = z
+  .object({ id: cuid, status: z.nativeEnum(TodoStatus) })
+  .strict();
+
 export const deleteTodoSchema = z.object({ id: cuid }).strict();
