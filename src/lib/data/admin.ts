@@ -23,6 +23,19 @@ export async function listUsers(organizationId: string) {
   return users.map(({ passwordHash, ...u }) => ({ ...u, pending: !passwordHash }));
 }
 
+export async function getOrgOverview(organizationId: string) {
+  const [org, members, students, sessions] = await Promise.all([
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true, slug: true, plan: true, trialEndsAt: true, createdAt: true },
+    }),
+    prisma.user.count({ where: { organizationId } }),
+    prisma.student.count({ where: { organizationId } }),
+    prisma.session.count({ where: { organizationId } }),
+  ]);
+  return { org, members, students, sessions };
+}
+
 export const AUDIT_PAGE_SIZE = 25;
 
 export async function listAudit(organizationId: string, query: AuditQuery) {

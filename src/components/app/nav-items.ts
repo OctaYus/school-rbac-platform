@@ -1,4 +1,5 @@
 import {
+  Building2,
   CalendarDays,
   LayoutDashboard,
   ListChecks,
@@ -24,4 +25,10 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/todos", label: "To-do", icon: ListChecks },
   { href: "/admin/users", label: "Users", icon: UserCog, capability: Capability.USER_MANAGE },
   { href: "/admin/audit", label: "Audit log", icon: ScrollText, capability: Capability.AUDIT_VIEW },
+  {
+    href: "/admin/organization",
+    label: "Organization",
+    icon: Building2,
+    capability: Capability.SETTINGS_MANAGE,
+  },
 ];
