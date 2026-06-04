@@ -5,6 +5,9 @@
 
 :root {
   --radius: 0.625rem;
+  /* Brand gradient (logo/wordmark) — overridden per color theme. */
+  --brand-from: #6366f1;
+  --brand-to: #7c3aed;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -122,4 +125,69 @@
     background-color: var(--background);
     color: var(--foreground);
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Color themes. Set via data-theme on <html>. Each overrides the brand accent
+ * (primary/ring/sidebar) and the logo gradient. Placed after .dark so they win
+ * in both light and dark mode (equal specificity, later rule).
+ * ------------------------------------------------------------------------- */
+[data-theme="school"] {
+  --primary: oklch(0.52 0.17 252);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.52 0.17 252);
+  --sidebar-primary: oklch(0.52 0.17 252);
+  --sidebar-ring: oklch(0.52 0.17 252);
+  --brand-from: #2563eb;
+  --brand-to: #1d4ed8;
+}
+
+[data-theme="bug-bounty"] {
+  --primary: oklch(0.78 0.21 150);
+  --primary-foreground: oklch(0.18 0.02 160);
+  --ring: oklch(0.78 0.21 150);
+  --sidebar-primary: oklch(0.78 0.21 150);
+  --sidebar-ring: oklch(0.78 0.21 150);
+  --brand-from: #4ade80;
+  --brand-to: #16a34a;
+}
+
+[data-theme="ocean"] {
+  --primary: oklch(0.58 0.12 205);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.58 0.12 205);
+  --sidebar-primary: oklch(0.58 0.12 205);
+  --sidebar-ring: oklch(0.58 0.12 205);
+  --brand-from: #06b6d4;
+  --brand-to: #0e7490;
+}
+
+[data-theme="sunset"] {
+  --primary: oklch(0.62 0.19 35);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.62 0.19 35);
+  --sidebar-primary: oklch(0.62 0.19 35);
+  --sidebar-ring: oklch(0.62 0.19 35);
+  --brand-from: #f97316;
+  --brand-to: #e11d48;
+}
+
+[data-theme="forest"] {
+  --primary: oklch(0.5 0.13 150);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.5 0.13 150);
+  --sidebar-primary: oklch(0.5 0.13 150);
+  --sidebar-ring: oklch(0.5 0.13 150);
+  --brand-from: #16a34a;
+  --brand-to: #15803d;
+}
+
+[data-theme="rose"] {
+  --primary: oklch(0.56 0.21 13);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.56 0.21 13);
+  --sidebar-primary: oklch(0.56 0.21 13);
+  --sidebar-ring: oklch(0.56 0.21 13);
+  --brand-from: #f43f5e;
+  --brand-to: #be185d;
 }

@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { ColorThemeProvider } from "@/components/color-theme-provider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -34,7 +35,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           disableTransitionOnChange
           nonce={nonce}
         >
-          {children}
+          <ColorThemeProvider>{children}</ColorThemeProvider>
         </ThemeProvider>
         <Analytics />
       </body>

@@ -27,7 +27,12 @@ export default function HomePage() {
         </span>
         <h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
           Run your school on{" "}
-          <span className="bg-gradient-to-r from-indigo-500 to-violet-600 bg-clip-text text-transparent">
+          <span
+            className="bg-clip-text text-transparent"
+            style={{
+              backgroundImage: "linear-gradient(90deg, var(--brand-from), var(--brand-to))",
+            }}
+          >
             Scholaris
           </span>
         </h1>
