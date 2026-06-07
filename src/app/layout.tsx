@@ -4,8 +4,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
+import { dirFor } from "@/lib/i18n/config";
+import { getI18n } from "@/lib/i18n/server";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ColorThemeProvider } from "@/components/color-theme-provider";
+import { I18nProvider } from "@/components/i18n-provider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -20,10 +23,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   // Pass the CSP nonce (set in middleware) to next-themes' inline script so it
   // is allowed under the strict nonce-based script-src policy.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const { locale, dict } = await getI18n();
 
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={dirFor(locale)}
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
@@ -35,7 +40,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           disableTransitionOnChange
           nonce={nonce}
         >
-          <ColorThemeProvider>{children}</ColorThemeProvider>
+          <ColorThemeProvider>
+            <I18nProvider locale={locale} dict={dict}>
+              {children}
+            </I18nProvider>
+          </ColorThemeProvider>
         </ThemeProvider>
         <Analytics />
       </body>

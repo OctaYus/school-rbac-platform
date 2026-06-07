@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth/session";
+import { getI18n } from "@/lib/i18n/server";
 import { SignupForm } from "@/components/auth/signup-form";
 import {
   Card,
@@ -18,21 +19,21 @@ export default async function SignupPage() {
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
 
+  const { t } = await getI18n();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Start your free trial</CardTitle>
-        <CardDescription>
-          Create your organization — 14 days free, no card required.
-        </CardDescription>
+        <CardTitle>{t("auth.signupTitle")}</CardTitle>
+        <CardDescription>{t("auth.signupDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         <SignupForm />
       </CardContent>
       <CardFooter className="text-muted-foreground justify-center text-sm">
-        Already have an account?&nbsp;
+        {t("auth.alreadyHave")}&nbsp;
         <Link href="/login" className="text-foreground hover:underline">
-          Sign in
+          {t("common.signIn")}
         </Link>
       </CardFooter>
     </Card>

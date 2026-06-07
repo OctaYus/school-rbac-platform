@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth/guards";
 import { smtpConfigured } from "@/lib/email/mailer";
+import { getI18n } from "@/lib/i18n/server";
 import { PageHeader } from "@/components/app/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmailChangeForm, PasswordForm, ProfileForm } from "@/components/account/account-forms";
@@ -29,21 +30,19 @@ function Section({
 export default async function AccountPage() {
   const user = await requireUser();
   const emailEnabled = smtpConfigured();
+  const { t } = await getI18n();
 
   return (
     <>
-      <PageHeader
-        title="Account settings"
-        description="Manage your profile, email, and password."
-      />
+      <PageHeader title={t("account.title")} description={t("account.desc")} />
       <Card className="max-w-3xl">
         <CardContent className="divide-y p-0">
-          <Section title="Profile" description="Your display name shown across Scholaris.">
+          <Section title={t("account.profile")} description={t("account.profileDesc")}>
             <ProfileForm initialName={user.name} />
           </Section>
 
           <Section
-            title="Email address"
+            title={t("account.emailTitle")}
             description={
               emailEnabled
                 ? "Change your email — we'll send a verification code to the new address."
@@ -59,10 +58,7 @@ export default async function AccountPage() {
             )}
           </Section>
 
-          <Section
-            title="Password"
-            description="Change your password. This signs you out everywhere."
-          >
+          <Section title={t("account.passwordTitle")} description={t("account.passwordDesc")}>
             <PasswordForm />
           </Section>
         </CardContent>

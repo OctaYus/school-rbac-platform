@@ -3,6 +3,7 @@ import { Download, Plus } from "lucide-react";
 import { StudentStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
+import { getI18n } from "@/lib/i18n/server";
 import { listStudents } from "@/lib/data/students";
 import { studentListQuerySchema } from "@/lib/validation/student";
 import { PageHeader } from "@/components/app/page-header";
@@ -18,6 +19,7 @@ export default async function StudentsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const user = await requireUser();
+  const { t } = await getI18n();
   const sp = await searchParams;
   const query = studentListQuerySchema.parse(sp);
   const { rows, total, page, pages } = await listStudents(user, query);
@@ -43,17 +45,19 @@ export default async function StudentsPage({
   return (
     <>
       <PageHeader
-        title="Students"
-        description={user.role === "TEACHER" ? "Students assigned to you" : `${total} students`}
+        title={t("students.title")}
+        description={
+          user.role === "TEACHER" ? t("students.assignedToYou") : `${total} ${t("nav.students")}`
+        }
       >
         <Button asChild variant="outline">
           <a href="/api/students/export">
-            <Download className="size-4" /> Export
+            <Download className="size-4" /> {t("common.export")}
           </a>
         </Button>
         <Button asChild>
           <Link href="/students/new">
-            <Plus className="size-4" /> New student
+            <Plus className="size-4" /> {t("students.newStudent")}
           </Link>
         </Button>
       </PageHeader>
@@ -62,7 +66,7 @@ export default async function StudentsPage({
         <Input
           name="q"
           defaultValue={query.q ?? ""}
-          placeholder="Search by name…"
+          placeholder={t("students.searchByName")}
           className="max-w-xs"
         />
         <select
@@ -70,7 +74,7 @@ export default async function StudentsPage({
           defaultValue={query.status ?? ""}
           className="border-input h-9 rounded-md border bg-transparent px-3 text-sm"
         >
-          <option value="">All statuses</option>
+          <option value="">{t("students.allStatuses")}</option>
           {Object.values(StudentStatus).map((s) => (
             <option key={s} value={s}>
               {s}
@@ -78,7 +82,7 @@ export default async function StudentsPage({
           ))}
         </select>
         <Button type="submit" variant="secondary">
-          Filter
+          {t("common.filter")}
         </Button>
       </form>
 
@@ -86,14 +90,14 @@ export default async function StudentsPage({
 
       <div className="text-muted-foreground mt-4 flex items-center justify-between text-sm">
         <span>
-          Page {page} of {pages}
+          {page} / {pages}
         </span>
         <div className="flex gap-2">
           <Button asChild variant="outline" size="sm" disabled={page <= 1}>
-            <Link href={makeHref({ page: Math.max(1, page - 1) })}>Previous</Link>
+            <Link href={makeHref({ page: Math.max(1, page - 1) })}>{t("common.previous")}</Link>
           </Button>
           <Button asChild variant="outline" size="sm" disabled={page >= pages}>
-            <Link href={makeHref({ page: Math.min(pages, page + 1) })}>Next</Link>
+            <Link href={makeHref({ page: Math.min(pages, page + 1) })}>{t("common.next")}</Link>
           </Button>
         </div>
       </div>

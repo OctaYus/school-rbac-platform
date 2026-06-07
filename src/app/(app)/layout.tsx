@@ -15,11 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-screen flex-1">
       <Sidebar role={user.role} orgName={orgName} />
       <div className="flex flex-1 flex-col">
-        <Topbar
-          user={{ name: user.name, email: user.email, role: user.role }}
-          orgName={orgName}
-          plan={org?.plan ?? "FREE"}
-        />
+        <Topbar user={{ name: user.name, email: user.email, role: user.role }} orgName={orgName} />
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>

@@ -8,6 +8,7 @@ import type { Role } from "@prisma/client";
 
 import { can } from "@/lib/auth/permissions";
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
 import { Logo } from "@/components/brand/logo";
 import { NAV_ITEMS } from "@/components/app/nav-items";
 import { Button } from "@/components/ui/button";
@@ -15,12 +16,13 @@ import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/com
 
 export function MobileNav({ role }: { role: Role }) {
   const pathname = usePathname();
+  const { t } = useT();
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+        <Button variant="ghost" size="icon" className="md:hidden" aria-label={t("nav.menu")}>
           <Menu className="size-5" />
         </Button>
       </SheetTrigger>
@@ -45,7 +47,7 @@ export function MobileNav({ role }: { role: Role }) {
                     )}
                   >
                     <Icon className="size-4" />
-                    {item.label}
+                    {t(item.key)}
                   </Link>
                 </SheetClose>
               );

@@ -12,6 +12,7 @@ import {
 import { Role, StudentStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
+import { getI18n } from "@/lib/i18n/server";
 import {
   getAdminDashboard,
   getSupervisorDashboard,
@@ -44,15 +45,17 @@ const SESSION_COLOR: Record<string, string> = {
   RESCHEDULED: "bg-amber-500",
   CANCELLED: "bg-zinc-400",
 };
+
 export default async function DashboardPage() {
   const user = await requireUser();
+  const { t } = await getI18n();
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Welcome back, {user.name.split(" ")[0]}
+            {t("dash.welcome")}, {user.name.split(" ")[0]}
           </h1>
           <p className="text-muted-foreground text-sm">
             {format(new Date(), "EEEE, MMMM d, yyyy")}
@@ -76,34 +79,39 @@ export default async function DashboardPage() {
 
 async function AdminView({ organizationId }: { organizationId: string }) {
   const d = await getAdminDashboard(organizationId);
+  const { t } = await getI18n();
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Active students"
+          label={t("dash.activeStudents")}
           value={d.activeStudents}
-          hint={`${d.totalStudents} total`}
+          hint={`${d.totalStudents} ${t("common.total")}`}
           icon={Users}
           accent="indigo"
         />
         <StatCard
-          label="Sessions today"
+          label={t("dash.sessionsToday")}
           value={d.sessionsToday}
           icon={CalendarCheck}
           accent="sky"
         />
         <StatCard
-          label="Overdue sessions"
+          label={t("dash.overdueSessions")}
           value={d.overdue}
-          hint="Scheduled, not actioned"
           icon={AlertTriangle}
           accent="rose"
         />
-        <StatCard label="Active users" value={d.activeUsers} icon={UserCheck} accent="emerald" />
+        <StatCard
+          label={t("dash.activeUsers")}
+          value={d.activeUsers}
+          icon={UserCheck}
+          accent="emerald"
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <SectionCard title="Students by status" href="/students">
+        <SectionCard title={t("dash.studentsByStatus")} href="/students">
           <BarBreakdown
             entries={Object.values(StudentStatus).map((s) => ({
               label: s,
@@ -112,7 +120,7 @@ async function AdminView({ organizationId }: { organizationId: string }) {
             }))}
           />
         </SectionCard>
-        <SectionCard title="This week's sessions" href="/sessions">
+        <SectionCard title={t("dash.weekSessions")} href="/sessions">
           <BarBreakdown
             entries={["SCHEDULED", "TAKEN", "MISSED", "RESCHEDULED", "CANCELLED"].map((s) => ({
               label: s,
@@ -124,9 +132,9 @@ async function AdminView({ organizationId }: { organizationId: string }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <SectionCard title="Upcoming sessions" href="/sessions" linkLabel="Schedule">
+        <SectionCard title={t("dash.upcoming")} href="/sessions">
           <SessionList
-            empty="No upcoming sessions."
+            empty={t("dash.noUpcoming")}
             items={d.upcoming.map((s) => ({
               id: s.id,
               type: s.type,
@@ -136,7 +144,7 @@ async function AdminView({ organizationId }: { organizationId: string }) {
             }))}
           />
         </SectionCard>
-        <SectionCard title="Recent activity" href="/admin/audit" linkLabel="Audit log">
+        <SectionCard title={t("dash.recentActivity")} href="/admin/audit">
           <ActivityFeed items={d.recentAudit.map((a) => ({ ...a }))} />
         </SectionCard>
       </div>
@@ -146,44 +154,43 @@ async function AdminView({ organizationId }: { organizationId: string }) {
 
 async function SupervisorView({ user }: { user: Parameters<typeof getSupervisorDashboard>[0] }) {
   const d = await getSupervisorDashboard(user);
+  const { t } = await getI18n();
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Scheduled this week"
+          label={t("dash.scheduledThisWeek")}
           value={d.scheduledThisWeek}
           icon={CalendarClock}
           accent="indigo"
         />
         <StatCard
-          label="Sessions today"
+          label={t("dash.sessionsToday")}
           value={d.sessionsToday}
           icon={CalendarCheck}
           accent="sky"
         />
         <StatCard
-          label="Completion (30d)"
+          label={t("dash.completion")}
           value={d.completionRate === null ? "—" : `${d.completionRate}%`}
-          hint="Taken vs taken+missed"
           icon={CheckCircle2}
           accent="emerald"
         />
         <StatCard
-          label="Need follow-up"
+          label={t("dash.needFollowUp")}
           value={d.followUp}
-          hint="Suspended students"
           icon={AlertTriangle}
           accent="rose"
         />
       </div>
 
-      <SectionCard title="Teacher completion (last 30 days)" href="/sessions">
+      <SectionCard title={t("dash.teacherCompletion")} href="/sessions">
         {d.teacherStats.length === 0 ? (
-          <p className="text-muted-foreground py-6 text-center text-sm">No session data yet.</p>
+          <p className="text-muted-foreground py-6 text-center text-sm">{t("dash.noData")}</p>
         ) : (
           <div className="space-y-4">
-            {d.teacherStats.map((t) => (
-              <CompletionRow key={t.name} {...t} />
+            {d.teacherStats.map((tc) => (
+              <CompletionRow key={tc.name} {...tc} />
             ))}
           </div>
         )}
@@ -194,30 +201,25 @@ async function SupervisorView({ user }: { user: Parameters<typeof getSupervisorD
 
 async function TeacherView({ user }: { user: Parameters<typeof getTeacherDashboard>[0] }) {
   const d = await getTeacherDashboard(user);
+  const { t } = await getI18n();
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          label="Sessions today"
+          label={t("dash.sessionsToday")}
           value={d.sessionsToday}
           icon={CalendarCheck}
           accent="sky"
         />
         <StatCard
-          label="Assigned students"
+          label={t("dash.assignedStudents")}
           value={d.assignedStudents}
           icon={GraduationCap}
           accent="indigo"
         />
+        <StatCard label={t("dash.overdue")} value={d.overdue} icon={AlertTriangle} accent="rose" />
         <StatCard
-          label="Overdue"
-          value={d.overdue}
-          hint="Mark taken / missed"
-          icon={AlertTriangle}
-          accent="rose"
-        />
-        <StatCard
-          label="Completed this week"
+          label={t("dash.completedThisWeek")}
           value={d.completedThisWeek}
           icon={CheckCircle2}
           accent="emerald"
@@ -225,9 +227,9 @@ async function TeacherView({ user }: { user: Parameters<typeof getTeacherDashboa
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <SectionCard title="Today's schedule" href="/sessions">
+        <SectionCard title={t("dash.todaySchedule")} href="/sessions">
           <SessionList
-            empty="Nothing scheduled today."
+            empty={t("dash.nothingToday")}
             items={d.todaySchedule.map((s) => ({
               id: s.id,
               type: s.type,
@@ -237,9 +239,9 @@ async function TeacherView({ user }: { user: Parameters<typeof getTeacherDashboa
             }))}
           />
         </SectionCard>
-        <SectionCard title="Your students" href="/students">
+        <SectionCard title={t("dash.yourStudents")} href="/students">
           {d.myStudents.length === 0 ? (
-            <p className="text-muted-foreground py-6 text-center text-sm">No assigned students.</p>
+            <p className="text-muted-foreground py-6 text-center text-sm">{t("dash.noStudents")}</p>
           ) : (
             <ul className="divide-y">
               {d.myStudents.map((s) => (

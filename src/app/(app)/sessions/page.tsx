@@ -5,6 +5,7 @@ import { Role, SessionStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
 import { Capability, can } from "@/lib/auth/permissions";
+import { getI18n } from "@/lib/i18n/server";
 import { listSessions } from "@/lib/data/sessions";
 import { sessionListQuerySchema } from "@/lib/validation/session";
 import { PageHeader } from "@/components/app/page-header";
@@ -31,20 +32,29 @@ export default async function SessionsPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const user = await requireUser();
+  const { t } = await getI18n();
   const sp = await searchParams;
   const query = sessionListQuerySchema.parse(sp);
   const rows = await listSessions(user, query);
 
   const isStaff = user.role !== Role.TEACHER;
   const canAssign = can(user.role, Capability.SESSION_ASSIGN);
+  const scopeLabel: Record<(typeof SCOPES)[number], string> = {
+    upcoming: t("sessions.upcoming"),
+    past: t("sessions.past"),
+    all: t("sessions.all"),
+  };
 
   return (
     <>
-      <PageHeader title="Sessions" description={isStaff ? "All sessions" : "Your schedule"}>
+      <PageHeader
+        title={t("sessions.title")}
+        description={isStaff ? t("sessions.allSessions") : t("sessions.yourSchedule")}
+      >
         {canAssign && (
           <Button asChild>
             <Link href="/sessions/assign">
-              <Plus className="size-4" /> Assign session
+              <Plus className="size-4" /> {t("sessions.assign")}
             </Link>
           </Button>
         )}
@@ -53,9 +63,7 @@ export default async function SessionsPage({
       <div className="mb-4 flex gap-1">
         {SCOPES.map((s) => (
           <Button key={s} asChild variant={query.scope === s ? "default" : "outline"} size="sm">
-            <Link href={`/sessions?scope=${s}`} className="capitalize">
-              {s}
-            </Link>
+            <Link href={`/sessions?scope=${s}`}>{scopeLabel[s]}</Link>
           </Button>
         ))}
       </div>

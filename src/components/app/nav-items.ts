@@ -10,24 +10,25 @@ import {
 } from "lucide-react";
 
 import { Capability } from "@/lib/auth/permissions";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
 export interface NavItem {
   href: string;
-  label: string;
+  key: TranslationKey;
   icon: LucideIcon;
   capability?: Capability;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/students", label: "Students", icon: Users },
-  { href: "/sessions", label: "Sessions", icon: CalendarDays },
-  { href: "/todos", label: "To-do", icon: ListChecks },
-  { href: "/admin/users", label: "Users", icon: UserCog, capability: Capability.USER_MANAGE },
-  { href: "/admin/audit", label: "Audit log", icon: ScrollText, capability: Capability.AUDIT_VIEW },
+  { href: "/dashboard", key: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/students", key: "nav.students", icon: Users },
+  { href: "/sessions", key: "nav.sessions", icon: CalendarDays },
+  { href: "/todos", key: "nav.todos", icon: ListChecks },
+  { href: "/admin/users", key: "nav.users", icon: UserCog, capability: Capability.USER_MANAGE },
+  { href: "/admin/audit", key: "nav.audit", icon: ScrollText, capability: Capability.AUDIT_VIEW },
   {
     href: "/admin/organization",
-    label: "Organization",
+    key: "nav.organization",
     icon: Building2,
     capability: Capability.SETTINGS_MANAGE,
   },

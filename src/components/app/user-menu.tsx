@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { LogOut, Settings } from "lucide-react";
-import type { PlanTier, Role } from "@prisma/client";
+import type { Role } from "@prisma/client";
 
 import { signOutAction } from "@/app/(app)/actions";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,12 +19,11 @@ import {
 export function UserMenu({
   user,
   orgName,
-  plan,
 }: {
   user: { name: string; email: string; role: Role };
   orgName: string;
-  plan: PlanTier;
 }) {
+  const { t } = useT();
   const initials = user.name
     .split(" ")
     .map((n) => n[0])
@@ -52,19 +52,16 @@ export function UserMenu({
               {orgName}
             </span>
           </div>
-          <div className="bg-muted text-muted-foreground mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">
-            {plan} plan
-          </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/account">
-            <Settings /> Account settings
+            <Settings /> {t("common.accountSettings")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOutAction()}>
-          <LogOut /> Sign out
+          <LogOut /> {t("common.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

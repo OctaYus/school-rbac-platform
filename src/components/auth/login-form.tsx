@@ -9,6 +9,7 @@ import type { z } from "zod";
 
 import { loginAction } from "@/app/(auth)/login/actions";
 import { loginSchema } from "@/lib/validation/auth";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ type FormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const {
@@ -51,13 +53,13 @@ export function LoginForm() {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("common.email")}</Label>
         <Input id="email" type="email" autoComplete="username" {...register("email")} />
         {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("common.password")}</Label>
         <Input
           id="password"
           type="password"
@@ -69,7 +71,7 @@ export function LoginForm() {
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}
-        Sign in
+        {t("common.signIn")}
       </Button>
     </form>
   );

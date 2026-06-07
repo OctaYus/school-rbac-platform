@@ -10,6 +10,7 @@ import type { z } from "zod";
 import { signupAction } from "@/app/(auth)/signup/actions";
 import { signupSchema } from "@/lib/validation/signup";
 import { PASSWORD_MIN_LENGTH } from "@/lib/auth/password-policy";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ type FormValues = z.infer<typeof signupSchema>;
 
 export function SignupForm() {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -48,22 +50,22 @@ export function SignupForm() {
         </p>
       )}
       <div className="space-y-2">
-        <Label htmlFor="orgName">Organization name</Label>
+        <Label htmlFor="orgName">{t("auth.orgName")}</Label>
         <Input id="orgName" placeholder="Acme Tutoring" {...register("orgName")} />
         {errors.orgName && <p className="text-destructive text-xs">{errors.orgName.message}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="name">Your name</Label>
+        <Label htmlFor="name">{t("auth.yourName")}</Label>
         <Input id="name" autoComplete="name" {...register("name")} />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="email">Work email</Label>
+        <Label htmlFor="email">{t("auth.workEmail")}</Label>
         <Input id="email" type="email" autoComplete="username" {...register("email")} />
         {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">{t("common.password")}</Label>
         <Input
           id="password"
           type="password"
@@ -80,7 +82,7 @@ export function SignupForm() {
       </div>
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}
-        Create organization
+        {t("auth.createOrg")}
       </Button>
     </form>
   );
