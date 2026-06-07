@@ -13,6 +13,7 @@ import { Role, StudentStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getI18n } from "@/lib/i18n/server";
+import { SESSION_STATUS_KEY, STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
 import {
   getAdminDashboard,
   getSupervisorDashboard,
@@ -114,7 +115,7 @@ async function AdminView({ organizationId }: { organizationId: string }) {
         <SectionCard title={t("dash.studentsByStatus")} href="/students">
           <BarBreakdown
             entries={Object.values(StudentStatus).map((s) => ({
-              label: s,
+              label: t(STUDENT_STATUS_KEY[s]),
               value: d.studentsByStatus[s] ?? 0,
               color: STUDENT_COLOR[s],
             }))}
@@ -122,11 +123,13 @@ async function AdminView({ organizationId }: { organizationId: string }) {
         </SectionCard>
         <SectionCard title={t("dash.weekSessions")} href="/sessions">
           <BarBreakdown
-            entries={["SCHEDULED", "TAKEN", "MISSED", "RESCHEDULED", "CANCELLED"].map((s) => ({
-              label: s,
-              value: d.weekSessionsByStatus[s] ?? 0,
-              color: SESSION_COLOR[s],
-            }))}
+            entries={(["SCHEDULED", "TAKEN", "MISSED", "RESCHEDULED", "CANCELLED"] as const).map(
+              (s) => ({
+                label: t(SESSION_STATUS_KEY[s]),
+                value: d.weekSessionsByStatus[s] ?? 0,
+                color: SESSION_COLOR[s],
+              }),
+            )}
           />
         </SectionCard>
       </div>

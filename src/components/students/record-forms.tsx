@@ -10,6 +10,7 @@ import type { z } from "zod";
 
 import { addHealthRecord, addMark, updateStudentNotes } from "@/app/(app)/students/actions";
 import { healthRecordSchema, markSchema } from "@/lib/validation/student";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ function ErrorText({ message }: { message?: string }) {
 
 export function MarkForm({ studentId }: { studentId: string }) {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
   type Values = z.input<typeof markSchema>;
   const {
@@ -47,29 +49,29 @@ export function MarkForm({ studentId }: { studentId: string }) {
       <input type="hidden" {...register("studentId")} />
       {serverError && <p className="text-destructive text-sm sm:col-span-2">{serverError}</p>}
       <div className="space-y-1">
-        <Label htmlFor="subject">Subject</Label>
+        <Label htmlFor="subject">{t("students.subject")}</Label>
         <Input id="subject" {...register("subject")} />
         <ErrorText message={errors.subject?.message} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="term">Term</Label>
+        <Label htmlFor="term">{t("students.term")}</Label>
         <Input id="term" placeholder="2025-T2" {...register("term")} />
         <ErrorText message={errors.term?.message} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="score">Score</Label>
+        <Label htmlFor="score">{t("students.score")}</Label>
         <Input id="score" type="number" step="0.01" {...register("score")} />
         <ErrorText message={errors.score?.message} />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="maxScore">Max score</Label>
+        <Label htmlFor="maxScore">{t("students.maxScore")}</Label>
         <Input id="maxScore" type="number" step="0.01" {...register("maxScore")} />
         <ErrorText message={errors.maxScore?.message} />
       </div>
       <div className="sm:col-span-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
-          Add mark
+          {t("students.addMark")}
         </Button>
       </div>
     </form>
@@ -78,6 +80,7 @@ export function MarkForm({ studentId }: { studentId: string }) {
 
 export function HealthForm({ studentId }: { studentId: string }) {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
   type Values = z.input<typeof healthRecordSchema>;
   const {
@@ -104,31 +107,32 @@ export function HealthForm({ studentId }: { studentId: string }) {
       <input type="hidden" {...register("studentId")} />
       {serverError && <p className="text-destructive text-sm">{serverError}</p>}
       <div className="space-y-1">
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category">{t("students.category")}</Label>
         <select
           id="category"
           {...register("category")}
           className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
         >
-          <option value={HealthCategory.MENTAL}>Mental</option>
-          <option value={HealthCategory.PHYSICAL}>Physical</option>
+          <option value={HealthCategory.MENTAL}>{t("hc.MENTAL")}</option>
+          <option value={HealthCategory.PHYSICAL}>{t("hc.PHYSICAL")}</option>
         </select>
       </div>
       <div className="space-y-1">
-        <Label htmlFor="summary">Summary</Label>
+        <Label htmlFor="summary">{t("students.summary")}</Label>
         <Input id="summary" {...register("summary")} />
         <ErrorText message={errors.summary?.message} />
       </div>
       <div className="space-y-1">
         <Label htmlFor="details">
-          Details <span className="text-muted-foreground">(encrypted at rest)</span>
+          {t("students.detailsField")}{" "}
+          <span className="text-muted-foreground">{t("students.encryptedAtRest")}</span>
         </Label>
         <Textarea id="details" rows={3} {...register("details")} />
         <ErrorText message={errors.details?.message} />
       </div>
       <Button type="submit" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="animate-spin" />}
-        Add health record
+        {t("students.addHealth")}
       </Button>
     </form>
   );
@@ -142,6 +146,7 @@ export function NotesForm({
   initialNotes: string;
 }) {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [notes, setNotes] = useState(initialNotes);
@@ -163,11 +168,11 @@ export function NotesForm({
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       {serverError && <p className="text-destructive text-sm">{serverError}</p>}
-      {saved && <p className="text-muted-foreground text-sm">Saved.</p>}
+      {saved && <p className="text-muted-foreground text-sm">{t("students.saved")}</p>}
       <Textarea rows={5} value={notes} onChange={(e) => setNotes(e.target.value)} />
       <Button type="submit" disabled={pending}>
         {pending && <Loader2 className="animate-spin" />}
-        Save notes
+        {t("students.saveNotes")}
       </Button>
     </form>
   );

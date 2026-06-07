@@ -10,6 +10,8 @@ import type { z } from "zod";
 
 import { createStudent, updateStudent } from "@/app/(app)/students/actions";
 import { createStudentSchema } from "@/lib/validation/student";
+import { useT } from "@/components/i18n-provider";
+import { STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,6 +31,7 @@ interface Props {
 
 export function StudentForm({ initial }: Props) {
   const router = useRouter();
+  const { t } = useT();
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -69,19 +72,19 @@ export function StudentForm({ initial }: Props) {
         </p>
       )}
       <div className="space-y-2">
-        <Label htmlFor="fullName">Full name</Label>
+        <Label htmlFor="fullName">{t("students.fullName")}</Label>
         <Input id="fullName" {...register("fullName")} />
         {errors.fullName && <p className="text-destructive text-xs">{errors.fullName.message}</p>}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="externalId">External ID (optional)</Label>
+        <Label htmlFor="externalId">{t("students.externalIdOptional")}</Label>
         <Input id="externalId" {...register("externalId")} />
         {errors.externalId && (
           <p className="text-destructive text-xs">{errors.externalId.message}</p>
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
+        <Label htmlFor="status">{t("students.statusLabel")}</Label>
         <select
           id="status"
           {...register("status")}
@@ -89,23 +92,23 @@ export function StudentForm({ initial }: Props) {
         >
           {Object.values(StudentStatus).map((s) => (
             <option key={s} value={s}>
-              {s}
+              {t(STUDENT_STATUS_KEY[s])}
             </option>
           ))}
         </select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
+        <Label htmlFor="notes">{t("students.notes")}</Label>
         <Textarea id="notes" rows={4} {...register("notes")} />
         {errors.notes && <p className="text-destructive text-xs">{errors.notes.message}</p>}
       </div>
       <div className="flex gap-2">
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="animate-spin" />}
-          {initial ? "Save changes" : "Create student"}
+          {initial ? t("common.saveChanges") : t("students.createStudent")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+          {t("common.cancel")}
         </Button>
       </div>
     </form>

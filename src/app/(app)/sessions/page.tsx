@@ -72,11 +72,11 @@ export default async function SessionsPage({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>When</TableHead>
-              <TableHead>Type</TableHead>
-              {isStaff && <TableHead>Teacher</TableHead>}
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("sessions.when")}</TableHead>
+              <TableHead>{t("sessions.type")}</TableHead>
+              {isStaff && <TableHead>{t("sessions.teacher")}</TableHead>}
+              <TableHead>{t("sessions.status")}</TableHead>
+              <TableHead className="text-right">{t("sessions.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -86,7 +86,7 @@ export default async function SessionsPage({
                   colSpan={isStaff ? 5 : 4}
                   className="text-muted-foreground py-8 text-center"
                 >
-                  No sessions.
+                  {t("sessions.none")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -98,7 +98,7 @@ export default async function SessionsPage({
                     <TableCell>
                       <div className="font-medium">{format(s.scheduledAt, "PP")}</div>
                       <div className="text-muted-foreground text-xs">
-                        {format(s.scheduledAt, "p")} · {s.durationMin} min
+                        {format(s.scheduledAt, "p")} · {s.durationMin} {t("sessions.min")}
                       </div>
                     </TableCell>
                     <TableCell>{s.type}</TableCell>

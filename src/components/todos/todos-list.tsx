@@ -14,6 +14,8 @@ import {
   updateTodo,
 } from "@/app/(app)/todos/actions";
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,26 +37,33 @@ export interface TodoItem {
   priority: TodoPriority;
 }
 
-const COLUMNS: { key: TodoStatus; label: string; dot: string }[] = [
-  { key: TodoStatus.TODO, label: "To do", dot: "bg-zinc-400" },
-  { key: TodoStatus.IN_PROGRESS, label: "In progress", dot: "bg-amber-500" },
-  { key: TodoStatus.DONE, label: "Done", dot: "bg-emerald-500" },
+const COLUMNS: { key: TodoStatus; labelKey: TranslationKey; dot: string }[] = [
+  { key: TodoStatus.TODO, labelKey: "todos.colTODO", dot: "bg-zinc-400" },
+  { key: TodoStatus.IN_PROGRESS, labelKey: "todos.colIN_PROGRESS", dot: "bg-amber-500" },
+  { key: TodoStatus.DONE, labelKey: "todos.colDONE", dot: "bg-emerald-500" },
 ];
 
-const PRIORITY: Record<TodoPriority, { label: string; cls: string } | null> = {
+const PRIORITY: Record<TodoPriority, { labelKey: TranslationKey; cls: string } | null> = {
   NONE: null,
-  LOW: { label: "Low", cls: "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400" },
+  LOW: {
+    labelKey: "todos.prLOW",
+    cls: "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400",
+  },
   MEDIUM: {
-    label: "Medium",
+    labelKey: "todos.prMEDIUM",
     cls: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
   },
-  HIGH: { label: "High", cls: "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400" },
+  HIGH: {
+    labelKey: "todos.prHIGH",
+    cls: "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400",
+  },
 };
 
 const PRIORITY_RANK: Record<TodoPriority, number> = { HIGH: 0, MEDIUM: 1, LOW: 2, NONE: 3 };
 
 export function TodosList({ todos }: { todos: TodoItem[] }) {
   const router = useRouter();
+  const { t } = useT();
   const [dragOver, setDragOver] = useState<TodoStatus | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
   const [addingCol, setAddingCol] = useState<TodoStatus | null>(null);
@@ -112,7 +121,7 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
               <div className="flex items-center justify-between px-1">
                 <h2 className="flex items-center gap-2 text-sm font-semibold">
                   <span className={cn("size-2 rounded-full", col.dot)} />
-                  {col.label}
+                  {t(col.labelKey)}
                   <span className="text-muted-foreground font-normal">{items.length}</span>
                 </h2>
                 {col.key === TodoStatus.DONE && doneCount > 0 && (
@@ -123,41 +132,43 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
                     }}
                     className="text-muted-foreground hover:text-foreground text-xs"
                   >
-                    Clear
+                    {t("todos.clear")}
                   </button>
                 )}
               </div>
 
               <div className="flex flex-col gap-2">
-                {items.map((t) => {
+                {items.map((todo) => {
                   const overdue =
-                    t.dueDate && t.status !== TodoStatus.DONE && isPast(new Date(t.dueDate));
-                  const pr = PRIORITY[t.priority];
+                    todo.dueDate &&
+                    todo.status !== TodoStatus.DONE &&
+                    isPast(new Date(todo.dueDate));
+                  const pr = PRIORITY[todo.priority];
                   return (
                     <div
-                      key={t.id}
+                      key={todo.id}
                       draggable
                       onDragStart={(e) => {
-                        e.dataTransfer.setData("text/plain", t.id);
+                        e.dataTransfer.setData("text/plain", todo.id);
                         e.dataTransfer.effectAllowed = "move";
-                        setDragId(t.id);
+                        setDragId(todo.id);
                       }}
                       onDragEnd={() => setDragId(null)}
-                      onClick={() => setEditing(t)}
+                      onClick={() => setEditing(todo)}
                       className={cn(
                         "bg-card cursor-pointer rounded-lg border p-3 shadow-sm transition hover:shadow-md",
-                        dragId === t.id && "opacity-50",
+                        dragId === todo.id && "opacity-50",
                       )}
                     >
                       <p
                         className={cn(
                           "text-sm font-medium",
-                          t.status === TodoStatus.DONE && "text-muted-foreground line-through",
+                          todo.status === TodoStatus.DONE && "text-muted-foreground line-through",
                         )}
                       >
-                        {t.title}
+                        {todo.title}
                       </p>
-                      {(pr || t.dueDate) && (
+                      {(pr || todo.dueDate) && (
                         <div className="mt-2 flex flex-wrap items-center gap-2">
                           {pr && (
                             <span
@@ -166,10 +177,10 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
                                 pr.cls,
                               )}
                             >
-                              {pr.label}
+                              {t(pr.labelKey)}
                             </span>
                           )}
-                          {t.dueDate && (
+                          {todo.dueDate && (
                             <span
                               className={cn(
                                 "inline-flex items-center gap-1 text-[11px]",
@@ -177,7 +188,7 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
                               )}
                             >
                               <CalendarDays className="size-3" />
-                              {format(new Date(t.dueDate), "MMM d")}
+                              {format(new Date(todo.dueDate), "MMM d")}
                             </span>
                           )}
                         </div>
@@ -199,7 +210,7 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
                         setNewTitle("");
                       }
                     }}
-                    placeholder="Task title…"
+                    placeholder={t("todos.taskTitlePlaceholder")}
                     className="h-9"
                   />
                 ) : (
@@ -210,7 +221,7 @@ export function TodosList({ todos }: { todos: TodoItem[] }) {
                     }}
                     className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm transition-colors"
                   >
-                    <Plus className="size-4" /> New
+                    <Plus className="size-4" /> {t("common.new")}
                   </button>
                 )}
               </div>
@@ -240,6 +251,7 @@ function EditTodoDialog({
   onClose: () => void;
   onChanged: () => void;
 }) {
+  const { t } = useT();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -250,7 +262,7 @@ function EditTodoDialog({
     <Dialog open={todo !== null} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit task</DialogTitle>
+          <DialogTitle>{t("todos.editTask")}</DialogTitle>
         </DialogHeader>
         <Fields
           key={todo.id}
@@ -296,6 +308,7 @@ function Fields({
   }) => void;
   onDelete: () => void;
 }) {
+  const { t } = useT();
   const [title, setTitle] = useState(todo.title);
   const [notes, setNotes] = useState(todo.notes ?? "");
   const [dueDate, setDueDate] = useState(
@@ -308,50 +321,50 @@ function Fields({
     <div className="space-y-4">
       {error && <p className="text-destructive text-sm">{error}</p>}
       <div className="space-y-2">
-        <Label htmlFor="t-title">Title</Label>
+        <Label htmlFor="t-title">{t("todos.fieldTitle")}</Label>
         <Input id="t-title" value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="t-notes">Description</Label>
+        <Label htmlFor="t-notes">{t("todos.description")}</Label>
         <Textarea
           id="t-notes"
           rows={3}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add details…"
+          placeholder={t("todos.addDetails")}
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label htmlFor="t-status">Status</Label>
+          <Label htmlFor="t-status">{t("todos.statusLabel")}</Label>
           <select
             id="t-status"
             value={status}
             onChange={(e) => setStatus(e.target.value as TodoStatus)}
             className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
           >
-            <option value="TODO">To do</option>
-            <option value="IN_PROGRESS">In progress</option>
-            <option value="DONE">Done</option>
+            <option value="TODO">{t("todos.colTODO")}</option>
+            <option value="IN_PROGRESS">{t("todos.colIN_PROGRESS")}</option>
+            <option value="DONE">{t("todos.colDONE")}</option>
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="t-priority">Priority</Label>
+          <Label htmlFor="t-priority">{t("todos.priority")}</Label>
           <select
             id="t-priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value as TodoPriority)}
             className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
           >
-            <option value="NONE">None</option>
-            <option value="LOW">Low</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HIGH">High</option>
+            <option value="NONE">{t("todos.prNONE")}</option>
+            <option value="LOW">{t("todos.prLOW")}</option>
+            <option value="MEDIUM">{t("todos.prMEDIUM")}</option>
+            <option value="HIGH">{t("todos.prHIGH")}</option>
           </select>
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="t-due">Due date</Label>
+        <Label htmlFor="t-due">{t("todos.dueDate")}</Label>
         <Input
           id="t-due"
           type="date"
@@ -361,14 +374,14 @@ function Fields({
       </div>
       <DialogFooter className="sm:justify-between">
         <Button variant="ghost" className="text-destructive" onClick={onDelete} disabled={busy}>
-          <Trash2 className="size-4" /> Delete
+          <Trash2 className="size-4" /> {t("common.delete")}
         </Button>
         <Button
           onClick={() => onSave({ title, notes, dueDate, status, priority })}
           disabled={busy || !title.trim()}
         >
           {busy && <Loader2 className="animate-spin" />}
-          Save
+          {t("common.save")}
         </Button>
       </DialogFooter>
     </div>

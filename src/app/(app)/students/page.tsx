@@ -4,6 +4,7 @@ import { StudentStatus } from "@prisma/client";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getI18n } from "@/lib/i18n/server";
+import { STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
 import { listStudents } from "@/lib/data/students";
 import { studentListQuerySchema } from "@/lib/validation/student";
 import { PageHeader } from "@/components/app/page-header";
@@ -77,7 +78,7 @@ export default async function StudentsPage({
           <option value="">{t("students.allStatuses")}</option>
           {Object.values(StudentStatus).map((s) => (
             <option key={s} value={s}>
-              {s}
+              {t(STUDENT_STATUS_KEY[s])}
             </option>
           ))}
         </select>

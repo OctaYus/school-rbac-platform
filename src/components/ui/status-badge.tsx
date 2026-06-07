@@ -1,6 +1,10 @@
+"use client";
+
 import type { SessionStatus, StudentStatus } from "@prisma/client";
 
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
+import { SESSION_STATUS_KEY, STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
 
 const PILL =
   "inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset whitespace-nowrap";
@@ -36,17 +40,20 @@ const SESSION: Record<SessionStatus, Color> = {
 };
 
 export function StudentStatusBadge({ status }: { status: StudentStatus }) {
-  return <span className={cn(PILL, COLORS[STUDENT[status]])}>{status}</span>;
+  const { t } = useT();
+  return <span className={cn(PILL, COLORS[STUDENT[status]])}>{t(STUDENT_STATUS_KEY[status])}</span>;
 }
 
 export function SessionStatusBadge({ status }: { status: SessionStatus }) {
-  return <span className={cn(PILL, COLORS[SESSION[status]])}>{status}</span>;
+  const { t } = useT();
+  return <span className={cn(PILL, COLORS[SESSION[status]])}>{t(SESSION_STATUS_KEY[status])}</span>;
 }
 
 export function ActiveBadge({ active }: { active: boolean }) {
+  const { t } = useT();
   return (
     <span className={cn(PILL, COLORS[active ? "emerald" : "rose"])}>
-      {active ? "Active" : "Disabled"}
+      {t(active ? "common.active" : "common.disabled")}
     </span>
   );
 }

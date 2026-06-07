@@ -7,6 +7,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import type { StudentStatus } from "@prisma/client";
 
 import { deleteStudents } from "@/app/(app)/students/actions";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { StudentStatusBadge } from "@/components/ui/status-badge";
 import {
@@ -59,6 +60,7 @@ function Check({
 
 export function StudentsTable({ rows }: { rows: StudentRow[] }) {
   const router = useRouter();
+  const { t } = useT();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,29 +95,28 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
     <div className="space-y-3">
       {someSelected && (
         <div className="bg-muted/50 flex items-center justify-between rounded-lg border px-3 py-2">
-          <span className="text-sm">{selected.size} selected</span>
+          <span className="text-sm">
+            {selected.size} {t("students.nSelected")}
+          </span>
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="destructive" size="sm">
-                <Trash2 className="size-4" /> Delete selected
+                <Trash2 className="size-4" /> {t("students.deleteSelected")}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Delete {selected.size} students?</DialogTitle>
-                <DialogDescription>
-                  This permanently removes the selected students and all their marks and health
-                  records. This cannot be undone.
-                </DialogDescription>
+                <DialogTitle>{t("students.deleteManyTitle")}</DialogTitle>
+                <DialogDescription>{t("students.deleteManyWarn")}</DialogDescription>
               </DialogHeader>
               {error && <p className="text-destructive text-sm">{error}</p>}
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
+                  <Button variant="outline">{t("common.cancel")}</Button>
                 </DialogClose>
                 <Button variant="destructive" onClick={onConfirmDelete} disabled={pending}>
                   {pending && <Loader2 className="animate-spin" />}
-                  Delete {selected.size}
+                  {t("common.delete")} {selected.size}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -128,19 +129,19 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-10">
-                <Check checked={allSelected} onChange={toggleAll} label="Select all" />
+                <Check checked={allSelected} onChange={toggleAll} label={t("students.selectAll")} />
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>External ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Records</TableHead>
+              <TableHead>{t("students.colName")}</TableHead>
+              <TableHead>{t("students.colExternalId")}</TableHead>
+              <TableHead>{t("students.colStatus")}</TableHead>
+              <TableHead className="text-right">{t("students.colRecords")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-muted-foreground py-8 text-center">
-                  No students found.
+                  {t("students.noneFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -150,7 +151,7 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
                     <Check
                       checked={selected.has(s.id)}
                       onChange={() => toggle(s.id)}
-                      label={`Select ${s.fullName}`}
+                      label={`${t("students.select")} ${s.fullName}`}
                     />
                   </TableCell>
                   <TableCell className="font-medium">
@@ -163,7 +164,8 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
                     <StudentStatusBadge status={s.status} />
                   </TableCell>
                   <TableCell className="text-muted-foreground text-right">
-                    {s.marksCount} marks · {s.healthCount} health
+                    {s.marksCount} {t("students.marksWord")} · {s.healthCount}{" "}
+                    {t("students.healthWord")}
                   </TableCell>
                 </TableRow>
               ))

@@ -6,6 +6,7 @@ import { CalendarClock, Check, Loader2, X } from "lucide-react";
 import { SessionStatus } from "@prisma/client";
 
 import { markSession } from "@/app/(app)/sessions/actions";
+import { useT } from "@/components/i18n-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
 
 export function MarkSessionActions({ id }: { id: string }) {
   const router = useRouter();
+  const { t } = useT();
   const [pending, setPending] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [rescheduleAt, setRescheduleAt] = useState("");
@@ -44,7 +46,7 @@ export function MarkSessionActions({ id }: { id: string }) {
         disabled={pending !== null}
       >
         {pending === SessionStatus.TAKEN ? <Loader2 className="animate-spin" /> : <Check />}
-        Taken
+        {t("ss.TAKEN")}
       </Button>
       <Button
         size="sm"
@@ -53,20 +55,20 @@ export function MarkSessionActions({ id }: { id: string }) {
         disabled={pending !== null}
       >
         {pending === SessionStatus.MISSED ? <Loader2 className="animate-spin" /> : <X />}
-        Missed
+        {t("ss.MISSED")}
       </Button>
       <Dialog>
         <DialogTrigger asChild>
           <Button size="sm" variant="ghost" disabled={pending !== null}>
-            <CalendarClock /> Reschedule
+            <CalendarClock /> {t("sessions.reschedule")}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reschedule session</DialogTitle>
+            <DialogTitle>{t("sessions.rescheduleTitle")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor={`resched-${id}`}>New date &amp; time</Label>
+            <Label htmlFor={`resched-${id}`}>{t("sessions.newDateTime")}</Label>
             <Input
               id={`resched-${id}`}
               type="datetime-local"
@@ -76,14 +78,14 @@ export function MarkSessionActions({ id }: { id: string }) {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">{t("common.cancel")}</Button>
             </DialogClose>
             <DialogClose asChild>
               <Button
                 onClick={() => run(SessionStatus.RESCHEDULED, rescheduleAt)}
                 disabled={!rescheduleAt}
               >
-                Reschedule
+                {t("sessions.reschedule")}
               </Button>
             </DialogClose>
           </DialogFooter>

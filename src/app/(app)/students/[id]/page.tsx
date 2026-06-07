@@ -4,6 +4,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Pencil } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
+import { getI18n } from "@/lib/i18n/server";
+import { HEALTH_CATEGORY_KEY } from "@/lib/i18n/enum-labels";
 import { getStudentDetail } from "@/lib/data/students";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +26,7 @@ import { HealthForm, MarkForm, NotesForm } from "@/components/students/record-fo
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
+  const { t } = await getI18n();
   const { id } = await params;
   const detail = await getStudentDetail(user, id);
   if (!detail) notFound();
@@ -35,7 +38,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       <PageHeader title={student.fullName} description={student.externalId ?? undefined}>
         <Button asChild variant="outline" size="sm">
           <Link href={`/students/${student.id}/edit`}>
-            <Pencil className="size-4" /> Edit
+            <Pencil className="size-4" /> {t("common.edit")}
           </Link>
         </Button>
         <DeleteStudent id={student.id} name={student.fullName} />
@@ -43,41 +46,41 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
       <Tabs defaultValue="overview">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="marks">Marks</TabsTrigger>
-          <TabsTrigger value="health">Health</TabsTrigger>
-          <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="overview">{t("students.tabOverview")}</TabsTrigger>
+          <TabsTrigger value="marks">{t("students.tabMarks")}</TabsTrigger>
+          <TabsTrigger value="health">{t("students.tabHealth")}</TabsTrigger>
+          <TabsTrigger value="notes">{t("students.tabNotes")}</TabsTrigger>
+          <TabsTrigger value="audit">{t("students.tabAudit")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Details</CardTitle>
+                <CardTitle className="text-base">{t("students.details")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status</span>
+                  <span className="text-muted-foreground">{t("students.colStatus")}</span>
                   <StudentStatusBadge status={student.status} />
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">External ID</span>
+                  <span className="text-muted-foreground">{t("students.colExternalId")}</span>
                   <span>{student.externalId ?? "—"}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Created</span>
+                  <span className="text-muted-foreground">{t("students.created")}</span>
                   <span>{format(student.createdAt, "PP")}</span>
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Assigned teachers</CardTitle>
+                <CardTitle className="text-base">{t("students.assignedTeachers")}</CardTitle>
               </CardHeader>
               <CardContent className="text-sm">
                 {assignments.length === 0 ? (
-                  <p className="text-muted-foreground">No teachers assigned.</p>
+                  <p className="text-muted-foreground">{t("students.noTeachers")}</p>
                 ) : (
                   <ul className="space-y-1">
                     {assignments.map((a) => (
@@ -99,17 +102,17 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Term</TableHead>
-                    <TableHead className="text-right">Score</TableHead>
-                    <TableHead className="text-right">Recorded</TableHead>
+                    <TableHead>{t("students.subject")}</TableHead>
+                    <TableHead>{t("students.term")}</TableHead>
+                    <TableHead className="text-right">{t("students.score")}</TableHead>
+                    <TableHead className="text-right">{t("students.recorded")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {marks.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={4} className="text-muted-foreground py-6 text-center">
-                        No marks yet.
+                        {t("students.noMarks")}
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -131,7 +134,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             </div>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Add mark</CardTitle>
+                <CardTitle className="text-base">{t("students.addMark")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MarkForm studentId={student.id} />
@@ -143,7 +146,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <TabsContent value="health">
           <div className="space-y-4">
             {health.length === 0 ? (
-              <p className="text-muted-foreground text-sm">No health records yet.</p>
+              <p className="text-muted-foreground text-sm">{t("students.noHealth")}</p>
             ) : (
               <div className="space-y-3">
                 {health.map((h) => (
@@ -151,7 +154,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm">{h.summary}</CardTitle>
                       <Badge variant={h.category === "MENTAL" ? "secondary" : "outline"}>
-                        {h.category}
+                        {t(HEALTH_CATEGORY_KEY[h.category])}
                       </Badge>
                     </CardHeader>
                     <CardContent className="space-y-1 text-sm">
@@ -164,7 +167,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             )}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Add health record</CardTitle>
+                <CardTitle className="text-base">{t("students.addHealth")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <HealthForm studentId={student.id} />
@@ -176,7 +179,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <TabsContent value="notes">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Notes</CardTitle>
+              <CardTitle className="text-base">{t("students.tabNotes")}</CardTitle>
             </CardHeader>
             <CardContent>
               <NotesForm studentId={student.id} initialNotes={student.notes ?? ""} />
@@ -187,11 +190,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <TabsContent value="audit">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Activity</CardTitle>
+              <CardTitle className="text-base">{t("students.activity")}</CardTitle>
             </CardHeader>
             <CardContent>
               {audit.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No activity recorded.</p>
+                <p className="text-muted-foreground text-sm">{t("students.noActivityRec")}</p>
               ) : (
                 <ul className="divide-y text-sm">
                   {audit.map((a) => (

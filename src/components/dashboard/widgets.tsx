@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
 import { ArrowRight, CalendarClock } from "lucide-react";
+import type { SessionStatus } from "@prisma/client";
 
 import { cn } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
+import { SESSION_STATUS_KEY } from "@/lib/i18n/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -19,6 +24,7 @@ export function SectionCard({
   children: React.ReactNode;
   className?: string;
 }) {
+  const { t } = useT();
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -28,7 +34,7 @@ export function SectionCard({
             href={href}
             className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs"
           >
-            {linkLabel ?? "View all"} <ArrowRight className="size-3" />
+            {linkLabel ?? t("common.viewAll")} <ArrowRight className="size-3" />
           </Link>
         )}
       </CardHeader>
@@ -56,6 +62,7 @@ const SESSION_STATUS_VARIANT: Record<string, "default" | "secondary" | "destruct
   };
 
 export function SessionList({ items, empty }: { items: SessionItem[]; empty: string }) {
+  const { t } = useT();
   if (items.length === 0) {
     return <p className="text-muted-foreground py-6 text-center text-sm">{empty}</p>;
   }
@@ -69,12 +76,14 @@ export function SessionList({ items, empty }: { items: SessionItem[]; empty: str
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium">{s.type}</div>
             <div className="text-muted-foreground truncate text-xs">
-              {format(s.scheduledAt, "EEE, MMM d · p")} · {s.durationMin} min
+              {format(s.scheduledAt, "EEE, MMM d · p")} · {s.durationMin} {t("sessions.min")}
               {s.sub ? ` · ${s.sub}` : ""}
             </div>
           </div>
           {s.status && (
-            <Badge variant={SESSION_STATUS_VARIANT[s.status] ?? "secondary"}>{s.status}</Badge>
+            <Badge variant={SESSION_STATUS_VARIANT[s.status] ?? "secondary"}>
+              {t(SESSION_STATUS_KEY[s.status as SessionStatus])}
+            </Badge>
           )}
         </li>
       ))}
@@ -89,9 +98,10 @@ export interface BarEntry {
 }
 
 export function BarBreakdown({ entries }: { entries: BarEntry[] }) {
+  const { t } = useT();
   const total = entries.reduce((a, b) => a + b.value, 0) || 1;
   if (entries.every((e) => e.value === 0)) {
-    return <p className="text-muted-foreground py-4 text-center text-sm">No data yet.</p>;
+    return <p className="text-muted-foreground py-4 text-center text-sm">{t("common.noData")}</p>;
   }
   return (
     <div className="space-y-3">
@@ -118,8 +128,9 @@ export function ActivityFeed({
 }: {
   items: { id: string; actorName: string; action: string; createdAt: Date }[];
 }) {
+  const { t } = useT();
   if (items.length === 0) {
-    return <p className="text-muted-foreground py-6 text-center text-sm">No activity yet.</p>;
+    return <p className="text-muted-foreground py-6 text-center text-sm">{t("dash.noActivity")}</p>;
   }
   return (
     <ul className="space-y-3">
