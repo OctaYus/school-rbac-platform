@@ -47,10 +47,13 @@ export const sessionTemplateSchema = z
   })
   .strict();
 
+// Treat empty-string query params as absent so optional/enum fields accept them.
+const emptyToUndefined = (v: unknown) => (v === "" ? undefined : v);
+
 export const sessionListQuerySchema = z.object({
-  scope: z.enum(["upcoming", "past", "all"]).default("upcoming"),
-  status: z.nativeEnum(SessionStatus).optional(),
-  teacherId: cuid.optional(),
+  scope: z.preprocess(emptyToUndefined, z.enum(["upcoming", "past", "all"]).default("upcoming")),
+  status: z.preprocess(emptyToUndefined, z.nativeEnum(SessionStatus).optional()),
+  teacherId: z.preprocess(emptyToUndefined, cuid.optional()),
 });
 
 export type SessionListQuery = z.infer<typeof sessionListQuerySchema>;

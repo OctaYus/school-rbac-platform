@@ -54,12 +54,19 @@ export const healthRecordSchema = z
   })
   .strict();
 
+// Treat empty-string query params (e.g. `?status=` from the "All statuses"
+// option, or `?q=`) as absent so optional/enum fields don't reject them.
+const emptyToUndefined = (v: unknown) => (v === "" ? undefined : v);
+
 export const studentListQuerySchema = z.object({
-  q: z.string().trim().max(80).optional(),
-  status: z.nativeEnum(StudentStatus).optional(),
-  page: z.coerce.number().int().min(1).max(10000).default(1),
-  sort: z.enum(["fullName", "createdAt", "status"]).default("fullName"),
-  dir: z.enum(["asc", "desc"]).default("asc"),
+  q: z.preprocess(emptyToUndefined, z.string().trim().max(80).optional()),
+  status: z.preprocess(emptyToUndefined, z.nativeEnum(StudentStatus).optional()),
+  page: z.preprocess(emptyToUndefined, z.coerce.number().int().min(1).max(10000).default(1)),
+  sort: z.preprocess(
+    emptyToUndefined,
+    z.enum(["fullName", "createdAt", "status"]).default("fullName"),
+  ),
+  dir: z.preprocess(emptyToUndefined, z.enum(["asc", "desc"]).default("asc")),
 });
 
 export type StudentListQuery = z.infer<typeof studentListQuerySchema>;
