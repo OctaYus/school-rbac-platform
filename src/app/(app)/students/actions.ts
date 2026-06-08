@@ -41,6 +41,11 @@ export async function createStudent(values: unknown): Promise<ActionResult<{ id:
         organizationId: user.organizationId,
         fullName: data.fullName,
         externalId: data.externalId,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth,
+        placeOfBirth: data.placeOfBirth,
+        parentPhone: data.parentPhone,
+        classroom: data.classroom,
         status: data.status,
         notes: data.notes,
       },
@@ -73,6 +78,11 @@ export async function updateStudent(values: unknown): Promise<ActionResult> {
       data: {
         fullName: data.fullName,
         externalId: data.externalId,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth,
+        placeOfBirth: data.placeOfBirth,
+        parentPhone: data.parentPhone,
+        classroom: data.classroom,
         status: data.status,
         notes: data.notes,
       },
@@ -82,7 +92,17 @@ export async function updateStudent(values: unknown): Promise<ActionResult> {
       action: "student.update",
       entity: "Student",
       entityId: updated.id,
-      diff: computeDiff(before, updated, ["fullName", "externalId", "status", "notes"]),
+      diff: computeDiff(before, updated, [
+        "fullName",
+        "externalId",
+        "gender",
+        "dateOfBirth",
+        "placeOfBirth",
+        "parentPhone",
+        "classroom",
+        "status",
+        "notes",
+      ]),
     });
     revalidatePath("/students");
     revalidatePath(`/students/${data.id}`);

@@ -71,6 +71,10 @@ const en = {
   "dash.nothingToday": "Nothing scheduled today.",
   "dash.noStudents": "No assigned students.",
   "dash.noData": "No session data yet.",
+  "dash.activity7d": "Activity — last 7 days",
+  "dash.totalLabel": "Total",
+  "dash.vsLastWeek": "vs last week",
+  "dash.newThisWeek": "new this week",
 
   "students.title": "Students",
   "students.assignedToYou": "Students assigned to you",
@@ -216,6 +220,71 @@ const en = {
   "todos.prLOW": "Low",
   "todos.prMEDIUM": "Medium",
   "todos.prHIGH": "High",
+
+  // Student classroom (cohort)
+  "students.classroom": "Classroom",
+  "students.classroomOptional": "Classroom (optional)",
+
+  // Student bio fields
+  "students.gender": "Gender",
+  "students.genderOptional": "Gender (optional)",
+  "students.genderUnset": "Not specified",
+  "students.dateOfBirth": "Date of birth",
+  "students.dateOfBirthOptional": "Date of birth (optional)",
+  "students.placeOfBirth": "Place of birth",
+  "students.placeOfBirthOptional": "Place of birth (optional)",
+  "students.parentPhone": "Parent phone number",
+  "students.parentPhoneOptional": "Parent phone number (optional)",
+  "gender.MALE": "Male",
+  "gender.FEMALE": "Female",
+
+  // Oral assessment — rubric levels
+  "rl.BEGINNER": "Beginner",
+  "rl.DEVELOPING": "Developing",
+  "rl.COMPETENT": "Competent",
+  "rl.DISTINGUISHED": "Distinguished",
+  // Oral assessment — rubric criteria
+  "cr.hifz": "Memorization (Hifz)",
+  "cr.tajweed": "Tajweed (Ghunnah/Mad)",
+  "cr.makharij": "Articulation (Makharij)",
+  // Oral assessment — panel
+  "assess.tab": "Oral assessment",
+  "assess.newTitle": "New oral assessment",
+  "assess.surah": "Passage / Surah",
+  "assess.surahPlaceholder": "e.g. Al-Mulk 1–10",
+  "assess.writtenScore": "Written test score (optional)",
+  "assess.writtenHint": "The matching written-theory score — used to detect grade inflation.",
+  "assess.computedGrade": "Computed grade",
+  "assess.save": "Save assessment",
+  "assess.history": "Assessment history",
+  "assess.none": "No oral assessments yet.",
+  "assess.oral": "Oral",
+  "assess.written": "Written",
+  "assess.revise": "Revise",
+  "assess.reviseTitle": "Revise grade",
+  "assess.reason": "Pedagogical reason",
+  "assess.reasonHint": "Required — every grade change is logged with its justification.",
+  "assess.deleteTitle": "Delete assessment?",
+  "assess.revisedBadge": "revised",
+  "assess.remedial": "Remedial plan",
+  "assess.remedialTitle": "Remedial plan (draft)",
+  "assess.remedialFocus": "Focus skill",
+  "assess.remedialDuration": "45-minute RTI lesson",
+  "assess.remedialDraftNotice":
+    "Auto-generated draft — review and adjust before sharing with the student (Human-in-the-Loop).",
+
+  // Dashboard — statistical balance engine
+  "bal.title": "Statistical balance",
+  "bal.subtitle": "Oral-grading consistency across classrooms",
+  "bal.noData": "No oral assessments recorded yet.",
+  "bal.inflationAlert": "Grade inflation alert",
+  "bal.alertSuffix":
+    "Oral grades are uniformly high but do not correlate with written assessments.",
+  "bal.classroomCompare": "Classroom comparison — average oral grade",
+  "bal.criteriaCompare": "Average by criterion (out of 4)",
+  "bal.classroom": "Classroom",
+  "bal.students": "students",
+  "bal.vsWritten": "vs. written",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -291,6 +360,10 @@ const ar: Dictionary = {
   "dash.nothingToday": "لا شيء مجدول اليوم.",
   "dash.noStudents": "لا يوجد طلاب مسندون.",
   "dash.noData": "لا توجد بيانات جلسات بعد.",
+  "dash.activity7d": "النشاط — آخر ٧ أيام",
+  "dash.totalLabel": "الإجمالي",
+  "dash.vsLastWeek": "مقارنة بالأسبوع الماضي",
+  "dash.newThisWeek": "جديد هذا الأسبوع",
 
   "students.title": "الطلاب",
   "students.assignedToYou": "الطلاب المسندون إليك",
@@ -436,6 +509,70 @@ const ar: Dictionary = {
   "todos.prLOW": "منخفضة",
   "todos.prMEDIUM": "متوسطة",
   "todos.prHIGH": "عالية",
+
+  // Student classroom (cohort)
+  "students.classroom": "الفصل",
+  "students.classroomOptional": "الفصل (اختياري)",
+
+  // Student bio fields
+  "students.gender": "النوع",
+  "students.genderOptional": "النوع (اختياري)",
+  "students.genderUnset": "غير محدد",
+  "students.dateOfBirth": "تاريخ الميلاد",
+  "students.dateOfBirthOptional": "تاريخ الميلاد (اختياري)",
+  "students.placeOfBirth": "مكان الميلاد",
+  "students.placeOfBirthOptional": "مكان الميلاد (اختياري)",
+  "students.parentPhone": "رقم هاتف ولي الأمر",
+  "students.parentPhoneOptional": "رقم هاتف ولي الأمر (اختياري)",
+  "gender.MALE": "ذكر",
+  "gender.FEMALE": "أنثى",
+
+  // Oral assessment — rubric levels
+  "rl.BEGINNER": "مبتدئ",
+  "rl.DEVELOPING": "يتطوّر",
+  "rl.COMPETENT": "متمكّن",
+  "rl.DISTINGUISHED": "متميّز",
+  // Oral assessment — rubric criteria
+  "cr.hifz": "الحفظ",
+  "cr.tajweed": "التجويد (الغنّة/المدّ)",
+  "cr.makharij": "المخارج",
+  // Oral assessment — panel
+  "assess.tab": "التقييم الشفهي",
+  "assess.newTitle": "تقييم شفهي جديد",
+  "assess.surah": "المقطع / السورة",
+  "assess.surahPlaceholder": "مثال: الملك ١–١٠",
+  "assess.writtenScore": "درجة الاختبار التحريري (اختياري)",
+  "assess.writtenHint": "درجة الاختبار التحريري المقابلة — تُستخدم لاكتشاف تضخّم الدرجات.",
+  "assess.computedGrade": "الدرجة المحتسبة",
+  "assess.save": "حفظ التقييم",
+  "assess.history": "سجل التقييمات",
+  "assess.none": "لا توجد تقييمات شفهية بعد.",
+  "assess.oral": "شفهي",
+  "assess.written": "تحريري",
+  "assess.revise": "مراجعة",
+  "assess.reviseTitle": "مراجعة الدرجة",
+  "assess.reason": "السبب التربوي",
+  "assess.reasonHint": "إلزامي — يُسجَّل كل تغيير في الدرجة مع مبرّره.",
+  "assess.deleteTitle": "حذف التقييم؟",
+  "assess.revisedBadge": "مُراجَع",
+  "assess.remedial": "خطة علاجية",
+  "assess.remedialTitle": "خطة علاجية (مسودة)",
+  "assess.remedialFocus": "المهارة المستهدفة",
+  "assess.remedialDuration": "درس علاجي ٤٥ دقيقة (RTI)",
+  "assess.remedialDraftNotice":
+    "مسودة مُولّدة تلقائيًا — راجِعها وعدّلها قبل مشاركتها مع الطالب (مراجعة بشرية).",
+
+  // Dashboard — statistical balance engine
+  "bal.title": "الميزان الإحصائي",
+  "bal.subtitle": "اتساق التقييم الشفهي بين الفصول",
+  "bal.noData": "لا توجد تقييمات شفهية مسجّلة بعد.",
+  "bal.inflationAlert": "تنبيه تضخّم الدرجات",
+  "bal.alertSuffix": "الدرجات الشفهية مرتفعة بشكل موحّد لكنها لا ترتبط بالتقييمات التحريرية.",
+  "bal.classroomCompare": "مقارنة الفصول — متوسط الدرجة الشفهية",
+  "bal.criteriaCompare": "المتوسط حسب المعيار (من ٤)",
+  "bal.classroom": "الفصل",
+  "bal.students": "طالب",
+  "bal.vsWritten": "مقابل التحريري",
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { en, ar };

@@ -60,13 +60,18 @@ export async function getStudentDetail(user: CurrentUser, id: string) {
     include: {
       marks: { orderBy: { recordedAt: "desc" } },
       healthRecords: { orderBy: { recordedAt: "desc" } },
+      oralAssessments: { orderBy: { recordedAt: "desc" } },
       assignments: { include: { teacher: { select: { id: true, name: true, email: true } } } },
     },
   });
   if (!student) return null;
 
   const audit = await prisma.auditLog.findMany({
-    where: { entity: { in: ["Student", "Mark", "HealthRecord"] }, entityId: id },
+    where: {
+      organizationId: user.organizationId,
+      entity: { in: ["Student", "Mark", "HealthRecord", "OralAssessment"] },
+      entityId: id,
+    },
     orderBy: { createdAt: "desc" },
     take: 25,
     select: { id: true, action: true, createdAt: true, actor: { select: { name: true } } },
@@ -80,17 +85,35 @@ export async function getStudentDetail(user: CurrentUser, id: string) {
     recordedAt: h.recordedAt,
   }));
 
+  const oralAssessments = student.oralAssessments.map((a) => ({
+    id: a.id,
+    surah: a.surah,
+    hifz: a.hifz,
+    tajweed: a.tajweed,
+    makharij: a.makharij,
+    oralScore: Number(a.oralScore),
+    writtenScore: a.writtenScore === null ? null : Number(a.writtenScore),
+    recordedAt: a.recordedAt,
+    updatedAt: a.updatedAt,
+  }));
+
   return {
     student: {
       id: student.id,
       fullName: student.fullName,
       externalId: student.externalId,
+      gender: student.gender,
+      dateOfBirth: student.dateOfBirth,
+      placeOfBirth: student.placeOfBirth,
+      parentPhone: student.parentPhone,
+      classroom: student.classroom,
       status: student.status,
       notes: student.notes,
       createdAt: student.createdAt,
     },
     marks: student.marks,
     health,
+    oralAssessments,
     assignments: student.assignments,
     audit,
   };

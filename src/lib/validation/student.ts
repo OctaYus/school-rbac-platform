@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { HealthCategory, StudentStatus } from "@prisma/client";
+import { Gender, HealthCategory, StudentStatus } from "@prisma/client";
 
 const cuid = z.string().min(1).max(40);
 
@@ -10,6 +10,30 @@ export const createStudentSchema = z
       .string()
       .trim()
       .max(40)
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
+    classroom: z
+      .string()
+      .trim()
+      .max(80)
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
+    gender: z.preprocess((v) => (v === "" ? undefined : v), z.nativeEnum(Gender).optional()),
+    parentPhone: z
+      .string()
+      .trim()
+      .max(30)
+      .regex(/^[0-9+()\-\s]*$/, "Enter a valid phone number.")
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
+    dateOfBirth: z.preprocess(
+      (v) => (v === "" || v === null ? undefined : v),
+      z.coerce.date().max(new Date(), "Date of birth cannot be in the future.").optional(),
+    ),
+    placeOfBirth: z
+      .string()
+      .trim()
+      .max(120)
       .optional()
       .transform((v) => (v === "" ? undefined : v)),
     status: z.nativeEnum(StudentStatus).default(StudentStatus.ACTIVE),
