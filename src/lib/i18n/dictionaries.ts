@@ -223,10 +223,14 @@ const en = {
 
   // Student bio fields
   "students.gender": "Gender",
+  "students.genderOptional": "Gender (optional)",
   "students.genderUnset": "Not specified",
   "students.dateOfBirth": "Date of birth",
+  "students.dateOfBirthOptional": "Date of birth (optional)",
   "students.placeOfBirth": "Place of birth",
+  "students.placeOfBirthOptional": "Place of birth (optional)",
   "students.parentPhone": "Parent phone number",
+  "students.parentPhoneOptional": "Parent phone number (optional)",
   "gender.MALE": "Male",
   "gender.FEMALE": "Female",
 
@@ -258,6 +262,12 @@ const en = {
   "assess.reasonHint": "Required — every grade change is logged with its justification.",
   "assess.deleteTitle": "Delete assessment?",
   "assess.revisedBadge": "revised",
+  "assess.remedial": "Remedial plan",
+  "assess.remedialTitle": "Remedial plan (draft)",
+  "assess.remedialFocus": "Focus skill",
+  "assess.remedialDuration": "45-minute RTI lesson",
+  "assess.remedialDraftNotice":
+    "Auto-generated draft — review and adjust before sharing with the student (Human-in-the-Loop).",
 
   // Dashboard — statistical balance engine
   "bal.title": "Statistical balance",
@@ -498,10 +508,14 @@ const ar: Dictionary = {
 
   // Student bio fields
   "students.gender": "النوع",
+  "students.genderOptional": "النوع (اختياري)",
   "students.genderUnset": "غير محدد",
   "students.dateOfBirth": "تاريخ الميلاد",
+  "students.dateOfBirthOptional": "تاريخ الميلاد (اختياري)",
   "students.placeOfBirth": "مكان الميلاد",
+  "students.placeOfBirthOptional": "مكان الميلاد (اختياري)",
   "students.parentPhone": "رقم هاتف ولي الأمر",
+  "students.parentPhoneOptional": "رقم هاتف ولي الأمر (اختياري)",
   "gender.MALE": "ذكر",
   "gender.FEMALE": "أنثى",
 
@@ -533,6 +547,12 @@ const ar: Dictionary = {
   "assess.reasonHint": "إلزامي — يُسجَّل كل تغيير في الدرجة مع مبرّره.",
   "assess.deleteTitle": "حذف التقييم؟",
   "assess.revisedBadge": "مُراجَع",
+  "assess.remedial": "خطة علاجية",
+  "assess.remedialTitle": "خطة علاجية (مسودة)",
+  "assess.remedialFocus": "المهارة المستهدفة",
+  "assess.remedialDuration": "درس علاجي ٤٥ دقيقة (RTI)",
+  "assess.remedialDraftNotice":
+    "مسودة مُولّدة تلقائيًا — راجِعها وعدّلها قبل مشاركتها مع الطالب (مراجعة بشرية).",
 
   // Dashboard — statistical balance engine
   "bal.title": "الميزان الإحصائي",

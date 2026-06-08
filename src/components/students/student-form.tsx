@@ -96,7 +96,7 @@ export function StudentForm({ initial }: Props) {
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="gender">{t("students.gender")}</Label>
+        <Label htmlFor="gender">{t("students.genderOptional")}</Label>
         <select
           id="gender"
           {...register("gender")}
@@ -111,21 +111,21 @@ export function StudentForm({ initial }: Props) {
         </select>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="dateOfBirth">{t("students.dateOfBirth")}</Label>
+        <Label htmlFor="dateOfBirth">{t("students.dateOfBirthOptional")}</Label>
         <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
         {errors.dateOfBirth && (
           <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="placeOfBirth">{t("students.placeOfBirth")}</Label>
+        <Label htmlFor="placeOfBirth">{t("students.placeOfBirthOptional")}</Label>
         <Input id="placeOfBirth" {...register("placeOfBirth")} />
         {errors.placeOfBirth && (
           <p className="text-destructive text-xs">{errors.placeOfBirth.message}</p>
         )}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="parentPhone">{t("students.parentPhone")}</Label>
+        <Label htmlFor="parentPhone">{t("students.parentPhoneOptional")}</Label>
         <Input id="parentPhone" type="tel" inputMode="tel" {...register("parentPhone")} />
         {errors.parentPhone && (
           <p className="text-destructive text-xs">{errors.parentPhone.message}</p>

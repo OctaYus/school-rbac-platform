@@ -2,9 +2,9 @@
 
 import { AlertTriangle, Scale } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { useT } from "@/components/i18n-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BalanceChart } from "@/components/dashboard/balance-chart";
 import type { StatisticalBalance as BalanceData } from "@/lib/data/assessments";
 
 export function StatisticalBalance({ data }: { data: BalanceData }) {
@@ -46,32 +46,28 @@ export function StatisticalBalance({ data }: { data: BalanceData }) {
               </div>
             )}
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <p className="text-muted-foreground text-xs font-medium">
                 {t("bal.classroomCompare")}
               </p>
-              {data.classrooms.map((c) => (
-                <div key={c.classroom} className="space-y-1">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-1.5">
-                      {c.classroom}
-                      {c.inflated && <AlertTriangle className="size-3 text-amber-600" />}
-                    </span>
-                    <span className="text-muted-foreground text-xs">
-                      {c.oralMean}% · σ {c.oralStdDev} · {c.count} {t("bal.students")}
-                    </span>
-                  </div>
-                  <div className="bg-muted h-2 overflow-hidden rounded-full">
-                    <div
-                      className={cn(
-                        "h-full rounded-full",
-                        c.inflated ? "bg-amber-500" : "bg-indigo-500",
-                      )}
-                      style={{ width: `${Math.min(100, Math.max(0, c.oralMean))}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+              <BalanceChart
+                rows={data.classrooms.map((c) => ({
+                  classroom: c.classroom,
+                  oral: c.oralMean,
+                  written: c.writtenMean,
+                  inflated: c.inflated,
+                }))}
+              />
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                {data.classrooms.map((c) => (
+                  <span
+                    key={c.classroom}
+                    className={c.inflated ? "font-medium text-amber-600" : "text-muted-foreground"}
+                  >
+                    {c.classroom}: σ {c.oralStdDev} · {c.count} {t("bal.students")}
+                  </span>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">

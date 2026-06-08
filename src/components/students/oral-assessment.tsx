@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { Loader2, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Sparkles, Trash2 } from "lucide-react";
 import { RubricLevel } from "@prisma/client";
 
 import {
@@ -17,6 +17,7 @@ import {
   RUBRIC_LEVELS,
   type RubricLevels,
 } from "@/lib/assessment/rubric";
+import { generateRemedialPlan } from "@/lib/assessment/remedial";
 import { CRITERION_KEY, RUBRIC_LEVEL_KEY } from "@/lib/i18n/enum-labels";
 import { cn } from "@/lib/utils";
 import { useT } from "@/components/i18n-provider";
@@ -346,6 +347,54 @@ function DeleteAssessmentDialog({ item }: { item: AssessmentItem }) {
   );
 }
 
+function RemedialPlanDialog({ item }: { item: AssessmentItem }) {
+  const { t, locale } = useT();
+  const plan = generateRemedialPlan(
+    { hifz: item.hifz, tajweed: item.tajweed, makharij: item.makharij },
+    locale,
+  );
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="text-violet-600 dark:text-violet-400">
+          <Sparkles className="size-4" /> {t("assess.remedial")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="size-4 text-violet-500" /> {t("assess.remedialTitle")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("assess.remedialFocus")}: <span className="font-medium">{plan.focusLabel}</span> ·{" "}
+            {t(RUBRIC_LEVEL_KEY[plan.level])} · {t("assess.remedialDuration")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <p className="rounded-md border border-violet-500/30 bg-violet-500/10 p-2.5 text-xs">
+            {t("assess.remedialDraftNotice")}
+          </p>
+          {plan.tiers.map((tier) => (
+            <div key={tier.tier} className="rounded-md border p-3">
+              <p className="mb-1.5 text-sm font-semibold">{tier.title}</p>
+              <ul className="list-disc space-y-1 ps-5 text-sm">
+                {tier.activities.map((a, i) => (
+                  <li key={i}>{a}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">{t("common.cancel")}</Button>
+          </DialogClose>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function AssessmentTable({ items }: { items: AssessmentItem[] }) {
   const { t } = useT();
   return (
@@ -389,6 +438,7 @@ function AssessmentTable({ items }: { items: AssessmentItem[] }) {
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-end gap-1">
+                  <RemedialPlanDialog item={a} />
                   <ReviseDialog item={a} />
                   <DeleteAssessmentDialog item={a} />
                 </div>
