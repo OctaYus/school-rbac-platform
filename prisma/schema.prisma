@@ -201,11 +201,21 @@ enum StudentStatus {
   ARCHIVED
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
 model Student {
   id             String        @id @default(cuid())
   organizationId String
   fullName       String
   externalId     String?
+  gender         Gender?
+  dateOfBirth    DateTime?
+  placeOfBirth   String?
+  // Parent / guardian contact phone number.
+  parentPhone    String?
   // Cohort label (e.g. "Grade 6 (B)") — used by the statistical balance engine
   // to compare grading consistency across classrooms.
   classroom      String?

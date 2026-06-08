@@ -1,4 +1,10 @@
-import type { HealthCategory, RubricLevel, SessionStatus, StudentStatus } from "@prisma/client";
+import type {
+  Gender,
+  HealthCategory,
+  RubricLevel,
+  SessionStatus,
+  StudentStatus,
+} from "@prisma/client";
 
 import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import type { RubricCriterion } from "@/lib/assessment/rubric";
@@ -25,6 +31,11 @@ export const SESSION_STATUS_KEY: Record<SessionStatus, TranslationKey> = {
 export const HEALTH_CATEGORY_KEY: Record<HealthCategory, TranslationKey> = {
   MENTAL: "hc.MENTAL",
   PHYSICAL: "hc.PHYSICAL",
+};
+
+export const GENDER_KEY: Record<Gender, TranslationKey> = {
+  MALE: "gender.MALE",
+  FEMALE: "gender.FEMALE",
 };
 
 // Oral-assessment rubric — four performance descriptors.

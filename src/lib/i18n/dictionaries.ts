@@ -221,6 +221,15 @@ const en = {
   "students.classroom": "Classroom",
   "students.classroomOptional": "Classroom (optional)",
 
+  // Student bio fields
+  "students.gender": "Gender",
+  "students.genderUnset": "Not specified",
+  "students.dateOfBirth": "Date of birth",
+  "students.placeOfBirth": "Place of birth",
+  "students.parentPhone": "Parent phone number",
+  "gender.MALE": "Male",
+  "gender.FEMALE": "Female",
+
   // Oral assessment — rubric levels
   "rl.BEGINNER": "Beginner",
   "rl.DEVELOPING": "Developing",
@@ -486,6 +495,15 @@ const ar: Dictionary = {
   // Student classroom (cohort)
   "students.classroom": "الفصل",
   "students.classroomOptional": "الفصل (اختياري)",
+
+  // Student bio fields
+  "students.gender": "النوع",
+  "students.genderUnset": "غير محدد",
+  "students.dateOfBirth": "تاريخ الميلاد",
+  "students.placeOfBirth": "مكان الميلاد",
+  "students.parentPhone": "رقم هاتف ولي الأمر",
+  "gender.MALE": "ذكر",
+  "gender.FEMALE": "أنثى",
 
   // Oral assessment — rubric levels
   "rl.BEGINNER": "مبتدئ",

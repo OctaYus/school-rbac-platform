@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { StudentStatus } from "@prisma/client";
+import { Gender, StudentStatus } from "@prisma/client";
 import type { z } from "zod";
 
 import { createStudent, updateStudent } from "@/app/(app)/students/actions";
 import { createStudentSchema } from "@/lib/validation/student";
 import { useT } from "@/components/i18n-provider";
-import { STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
+import { GENDER_KEY, STUDENT_STATUS_KEY } from "@/lib/i18n/enum-labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,10 @@ interface Props {
     id: string;
     fullName: string;
     externalId: string | null;
+    gender: Gender | null;
+    dateOfBirth: Date | null;
+    placeOfBirth: string | null;
+    parentPhone: string | null;
     classroom: string | null;
     status: StudentStatus;
     notes: string | null;
@@ -43,6 +47,12 @@ export function StudentForm({ initial }: Props) {
     defaultValues: {
       fullName: initial?.fullName ?? "",
       externalId: initial?.externalId ?? "",
+      gender: initial?.gender ?? "",
+      dateOfBirth: initial?.dateOfBirth
+        ? new Date(initial.dateOfBirth).toISOString().slice(0, 10)
+        : "",
+      placeOfBirth: initial?.placeOfBirth ?? "",
+      parentPhone: initial?.parentPhone ?? "",
       classroom: initial?.classroom ?? "",
       status: initial?.status ?? StudentStatus.ACTIVE,
       notes: initial?.notes ?? "",
@@ -83,6 +93,42 @@ export function StudentForm({ initial }: Props) {
         <Input id="externalId" {...register("externalId")} />
         {errors.externalId && (
           <p className="text-destructive text-xs">{errors.externalId.message}</p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="gender">{t("students.gender")}</Label>
+        <select
+          id="gender"
+          {...register("gender")}
+          className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+        >
+          <option value="">{t("students.genderUnset")}</option>
+          {Object.values(Gender).map((g) => (
+            <option key={g} value={g}>
+              {t(GENDER_KEY[g])}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="dateOfBirth">{t("students.dateOfBirth")}</Label>
+        <Input id="dateOfBirth" type="date" {...register("dateOfBirth")} />
+        {errors.dateOfBirth && (
+          <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="placeOfBirth">{t("students.placeOfBirth")}</Label>
+        <Input id="placeOfBirth" {...register("placeOfBirth")} />
+        {errors.placeOfBirth && (
+          <p className="text-destructive text-xs">{errors.placeOfBirth.message}</p>
+        )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="parentPhone">{t("students.parentPhone")}</Label>
+        <Input id="parentPhone" type="tel" inputMode="tel" {...register("parentPhone")} />
+        {errors.parentPhone && (
+          <p className="text-destructive text-xs">{errors.parentPhone.message}</p>
         )}
       </div>
       <div className="space-y-2">

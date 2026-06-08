@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 
 import { requireUser } from "@/lib/auth/guards";
 import { getI18n } from "@/lib/i18n/server";
-import { HEALTH_CATEGORY_KEY } from "@/lib/i18n/enum-labels";
+import { GENDER_KEY, HEALTH_CATEGORY_KEY } from "@/lib/i18n/enum-labels";
 import { getStudentDetail } from "@/lib/data/students";
 import { PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,22 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("students.colExternalId")}</span>
                   <span>{student.externalId ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("students.gender")}</span>
+                  <span>{student.gender ? t(GENDER_KEY[student.gender]) : "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("students.dateOfBirth")}</span>
+                  <span>{student.dateOfBirth ? format(student.dateOfBirth, "PP") : "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("students.placeOfBirth")}</span>
+                  <span>{student.placeOfBirth ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("students.parentPhone")}</span>
+                  <span dir="ltr">{student.parentPhone ?? "—"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("students.classroom")}</span>
