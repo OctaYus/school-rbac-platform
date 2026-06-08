@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { DeleteStudent } from "@/components/students/delete-student";
 import { HealthForm, MarkForm, NotesForm } from "@/components/students/record-forms";
+import { OralAssessmentPanel } from "@/components/students/oral-assessment";
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -31,7 +32,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const detail = await getStudentDetail(user, id);
   if (!detail) notFound();
 
-  const { student, marks, health, assignments, audit } = detail;
+  const { student, marks, health, oralAssessments, assignments, audit } = detail;
 
   return (
     <>
@@ -47,6 +48,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">{t("students.tabOverview")}</TabsTrigger>
+          <TabsTrigger value="assessment">{t("assess.tab")}</TabsTrigger>
           <TabsTrigger value="marks">{t("students.tabMarks")}</TabsTrigger>
           <TabsTrigger value="health">{t("students.tabHealth")}</TabsTrigger>
           <TabsTrigger value="notes">{t("students.tabNotes")}</TabsTrigger>
@@ -67,6 +69,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("students.colExternalId")}</span>
                   <span>{student.externalId ?? "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">{t("students.classroom")}</span>
+                  <span>{student.classroom ?? "—"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{t("students.created")}</span>
@@ -94,6 +100,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="assessment">
+          <OralAssessmentPanel studentId={student.id} items={oralAssessments} />
         </TabsContent>
 
         <TabsContent value="marks">

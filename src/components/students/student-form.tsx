@@ -24,6 +24,7 @@ interface Props {
     id: string;
     fullName: string;
     externalId: string | null;
+    classroom: string | null;
     status: StudentStatus;
     notes: string | null;
   };
@@ -42,6 +43,7 @@ export function StudentForm({ initial }: Props) {
     defaultValues: {
       fullName: initial?.fullName ?? "",
       externalId: initial?.externalId ?? "",
+      classroom: initial?.classroom ?? "",
       status: initial?.status ?? StudentStatus.ACTIVE,
       notes: initial?.notes ?? "",
     },
@@ -82,6 +84,11 @@ export function StudentForm({ initial }: Props) {
         {errors.externalId && (
           <p className="text-destructive text-xs">{errors.externalId.message}</p>
         )}
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="classroom">{t("students.classroomOptional")}</Label>
+        <Input id="classroom" placeholder="Grade 6 (B)" {...register("classroom")} />
+        {errors.classroom && <p className="text-destructive text-xs">{errors.classroom.message}</p>}
       </div>
       <div className="space-y-2">
         <Label htmlFor="status">{t("students.statusLabel")}</Label>

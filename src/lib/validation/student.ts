@@ -12,6 +12,12 @@ export const createStudentSchema = z
       .max(40)
       .optional()
       .transform((v) => (v === "" ? undefined : v)),
+    classroom: z
+      .string()
+      .trim()
+      .max(80)
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
     status: z.nativeEnum(StudentStatus).default(StudentStatus.ACTIVE),
     notes: z.string().trim().max(5000).optional(),
   })

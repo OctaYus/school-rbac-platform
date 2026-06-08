@@ -8,10 +8,18 @@
  * Run with: pnpm db:seed  (goes through `prisma db seed`, which loads .env)
  */
 import { randomBytes } from "node:crypto";
-import { PrismaClient, Role, StudentStatus, HealthCategory, SessionStatus } from "@prisma/client";
+import {
+  PrismaClient,
+  Role,
+  RubricLevel,
+  StudentStatus,
+  HealthCategory,
+  SessionStatus,
+} from "@prisma/client";
 
 import { hashPassword } from "../src/lib/auth/password";
 import { encrypt } from "../src/lib/security/crypto";
+import { computeOralScore } from "../src/lib/assessment/rubric";
 
 const prisma = new PrismaClient();
 
@@ -106,17 +114,23 @@ async function main() {
     "Khan",
   ];
 
+  // First half → "Grade 6 (A)", second half → "Grade 6 (B)" so the statistical
+  // balance engine has two cohorts to compare.
+  const classroomFor = (i: number) => (i < 5 ? "Grade 6 (A)" : "Grade 6 (B)");
+
   const studentIds: string[] = [];
   for (let i = 0; i < 10; i++) {
     const fullName = `${firstNames[i]} ${lastNames[i]}`;
     const externalId = `STU-${String(1000 + i)}`;
+    const classroom = classroomFor(i);
     const student = await prisma.student.upsert({
       where: { organizationId_externalId: { organizationId: org.id, externalId } },
-      update: { fullName },
+      update: { fullName, classroom },
       create: {
         organizationId: org.id,
         fullName,
         externalId,
+        classroom,
         status: i % 7 === 0 ? StudentStatus.SUSPENDED : StudentStatus.ACTIVE,
         notes: i % 3 === 0 ? "Prefers morning sessions." : null,
       },
@@ -157,6 +171,49 @@ async function main() {
         summary: note.summary,
         details: encrypt(note.details, "healthrecord"),
         recordedById: users.SUPERVISOR.id,
+      },
+    });
+  }
+
+  // --- Oral assessments (Mizan Al-Farooq rubric) ---
+  // Grade 6 (A): oral marks track the written marks → no inflation.
+  // Grade 6 (B): uniformly perfect oral marks vs. variable written → flagged.
+  const D = RubricLevel.DISTINGUISHED;
+  const C = RubricLevel.COMPETENT;
+  const Dv = RubricLevel.DEVELOPING;
+  const B = RubricLevel.BEGINNER;
+  const oralSeed: Array<{
+    idx: number;
+    hifz: RubricLevel;
+    tajweed: RubricLevel;
+    makharij: RubricLevel;
+    written: number;
+  }> = [
+    { idx: 0, hifz: D, tajweed: C, makharij: C, written: 80 },
+    { idx: 1, hifz: C, tajweed: C, makharij: C, written: 72 },
+    { idx: 2, hifz: Dv, tajweed: C, makharij: Dv, written: 60 },
+    { idx: 3, hifz: D, tajweed: D, makharij: D, written: 95 },
+    { idx: 4, hifz: B, tajweed: Dv, makharij: C, written: 55 },
+    { idx: 5, hifz: D, tajweed: D, makharij: D, written: 60 },
+    { idx: 6, hifz: D, tajweed: D, makharij: D, written: 90 },
+    { idx: 7, hifz: D, tajweed: D, makharij: D, written: 75 },
+    { idx: 8, hifz: D, tajweed: D, makharij: D, written: 50 },
+    { idx: 9, hifz: D, tajweed: D, makharij: D, written: 85 },
+  ];
+
+  // Idempotent re-seed: clear existing assessments for these students first.
+  await prisma.oralAssessment.deleteMany({ where: { studentId: { in: studentIds } } });
+  for (const o of oralSeed) {
+    const levels = { hifz: o.hifz, tajweed: o.tajweed, makharij: o.makharij };
+    await prisma.oralAssessment.create({
+      data: {
+        organizationId: org.id,
+        studentId: studentIds[o.idx],
+        surah: "Al-Mulk 1–10",
+        ...levels,
+        oralScore: computeOralScore(levels),
+        writtenScore: o.written,
+        recordedById: users.TEACHER.id,
       },
     });
   }

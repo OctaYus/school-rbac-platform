@@ -216,6 +216,52 @@ const en = {
   "todos.prLOW": "Low",
   "todos.prMEDIUM": "Medium",
   "todos.prHIGH": "High",
+
+  // Student classroom (cohort)
+  "students.classroom": "Classroom",
+  "students.classroomOptional": "Classroom (optional)",
+
+  // Oral assessment — rubric levels
+  "rl.BEGINNER": "Beginner",
+  "rl.DEVELOPING": "Developing",
+  "rl.COMPETENT": "Competent",
+  "rl.DISTINGUISHED": "Distinguished",
+  // Oral assessment — rubric criteria
+  "cr.hifz": "Memorization (Hifz)",
+  "cr.tajweed": "Tajweed (Ghunnah/Mad)",
+  "cr.makharij": "Articulation (Makharij)",
+  // Oral assessment — panel
+  "assess.tab": "Oral assessment",
+  "assess.newTitle": "New oral assessment",
+  "assess.surah": "Passage / Surah",
+  "assess.surahPlaceholder": "e.g. Al-Mulk 1–10",
+  "assess.writtenScore": "Written test score (optional)",
+  "assess.writtenHint": "The matching written-theory score — used to detect grade inflation.",
+  "assess.computedGrade": "Computed grade",
+  "assess.save": "Save assessment",
+  "assess.history": "Assessment history",
+  "assess.none": "No oral assessments yet.",
+  "assess.oral": "Oral",
+  "assess.written": "Written",
+  "assess.revise": "Revise",
+  "assess.reviseTitle": "Revise grade",
+  "assess.reason": "Pedagogical reason",
+  "assess.reasonHint": "Required — every grade change is logged with its justification.",
+  "assess.deleteTitle": "Delete assessment?",
+  "assess.revisedBadge": "revised",
+
+  // Dashboard — statistical balance engine
+  "bal.title": "Statistical balance",
+  "bal.subtitle": "Oral-grading consistency across classrooms",
+  "bal.noData": "No oral assessments recorded yet.",
+  "bal.inflationAlert": "Grade inflation alert",
+  "bal.alertSuffix":
+    "Oral grades are uniformly high but do not correlate with written assessments.",
+  "bal.classroomCompare": "Classroom comparison — average oral grade",
+  "bal.criteriaCompare": "Average by criterion (out of 4)",
+  "bal.classroom": "Classroom",
+  "bal.students": "students",
+  "bal.vsWritten": "vs. written",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -436,6 +482,51 @@ const ar: Dictionary = {
   "todos.prLOW": "منخفضة",
   "todos.prMEDIUM": "متوسطة",
   "todos.prHIGH": "عالية",
+
+  // Student classroom (cohort)
+  "students.classroom": "الفصل",
+  "students.classroomOptional": "الفصل (اختياري)",
+
+  // Oral assessment — rubric levels
+  "rl.BEGINNER": "مبتدئ",
+  "rl.DEVELOPING": "يتطوّر",
+  "rl.COMPETENT": "متمكّن",
+  "rl.DISTINGUISHED": "متميّز",
+  // Oral assessment — rubric criteria
+  "cr.hifz": "الحفظ",
+  "cr.tajweed": "التجويد (الغنّة/المدّ)",
+  "cr.makharij": "المخارج",
+  // Oral assessment — panel
+  "assess.tab": "التقييم الشفهي",
+  "assess.newTitle": "تقييم شفهي جديد",
+  "assess.surah": "المقطع / السورة",
+  "assess.surahPlaceholder": "مثال: الملك ١–١٠",
+  "assess.writtenScore": "درجة الاختبار التحريري (اختياري)",
+  "assess.writtenHint": "درجة الاختبار التحريري المقابلة — تُستخدم لاكتشاف تضخّم الدرجات.",
+  "assess.computedGrade": "الدرجة المحتسبة",
+  "assess.save": "حفظ التقييم",
+  "assess.history": "سجل التقييمات",
+  "assess.none": "لا توجد تقييمات شفهية بعد.",
+  "assess.oral": "شفهي",
+  "assess.written": "تحريري",
+  "assess.revise": "مراجعة",
+  "assess.reviseTitle": "مراجعة الدرجة",
+  "assess.reason": "السبب التربوي",
+  "assess.reasonHint": "إلزامي — يُسجَّل كل تغيير في الدرجة مع مبرّره.",
+  "assess.deleteTitle": "حذف التقييم؟",
+  "assess.revisedBadge": "مُراجَع",
+
+  // Dashboard — statistical balance engine
+  "bal.title": "الميزان الإحصائي",
+  "bal.subtitle": "اتساق التقييم الشفهي بين الفصول",
+  "bal.noData": "لا توجد تقييمات شفهية مسجّلة بعد.",
+  "bal.inflationAlert": "تنبيه تضخّم الدرجات",
+  "bal.alertSuffix": "الدرجات الشفهية مرتفعة بشكل موحّد لكنها لا ترتبط بالتقييمات التحريرية.",
+  "bal.classroomCompare": "مقارنة الفصول — متوسط الدرجة الشفهية",
+  "bal.criteriaCompare": "المتوسط حسب المعيار (من ٤)",
+  "bal.classroom": "الفصل",
+  "bal.students": "طالب",
+  "bal.vsWritten": "مقابل التحريري",
 };
 
 export const dictionaries: Record<Locale, Dictionary> = { en, ar };

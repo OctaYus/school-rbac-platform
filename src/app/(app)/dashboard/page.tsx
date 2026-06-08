@@ -19,6 +19,7 @@ import {
   getSupervisorDashboard,
   getTeacherDashboard,
 } from "@/lib/data/dashboard";
+import { getStatisticalBalance } from "@/lib/data/assessments";
 import { StatCard } from "@/components/app/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { StudentStatusBadge } from "@/components/ui/status-badge";
@@ -29,6 +30,7 @@ import {
   SectionCard,
   SessionList,
 } from "@/components/dashboard/widgets";
+import { StatisticalBalance } from "@/components/dashboard/statistical-balance";
 
 export const metadata = { title: "Dashboard · Scholaris" };
 
@@ -79,7 +81,10 @@ export default async function DashboardPage() {
 }
 
 async function AdminView({ organizationId }: { organizationId: string }) {
-  const d = await getAdminDashboard(organizationId);
+  const [d, balance] = await Promise.all([
+    getAdminDashboard(organizationId),
+    getStatisticalBalance(organizationId),
+  ]);
   const { t } = await getI18n();
   return (
     <>
@@ -134,6 +139,8 @@ async function AdminView({ organizationId }: { organizationId: string }) {
         </SectionCard>
       </div>
 
+      <StatisticalBalance data={balance} />
+
       <div className="grid gap-4 md:grid-cols-2">
         <SectionCard title={t("dash.upcoming")} href="/sessions">
           <SessionList
@@ -156,7 +163,10 @@ async function AdminView({ organizationId }: { organizationId: string }) {
 }
 
 async function SupervisorView({ user }: { user: Parameters<typeof getSupervisorDashboard>[0] }) {
-  const d = await getSupervisorDashboard(user);
+  const [d, balance] = await Promise.all([
+    getSupervisorDashboard(user),
+    getStatisticalBalance(user.organizationId),
+  ]);
   const { t } = await getI18n();
   return (
     <>
@@ -186,6 +196,8 @@ async function SupervisorView({ user }: { user: Parameters<typeof getSupervisorD
           accent="rose"
         />
       </div>
+
+      <StatisticalBalance data={balance} />
 
       <SectionCard title={t("dash.teacherCompletion")} href="/sessions">
         {d.teacherStats.length === 0 ? (

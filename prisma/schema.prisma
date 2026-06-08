@@ -42,12 +42,13 @@ model Organization {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users     User[]
-  students  Student[]
-  sessions  Session[]
-  templates SessionTemplate[]
-  auditLogs AuditLog[]
-  todos     Todo[]
+  users           User[]
+  students        Student[]
+  sessions        Session[]
+  templates       SessionTemplate[]
+  auditLogs       AuditLog[]
+  todos           Todo[]
+  oralAssessments OralAssessment[]
 }
 
 // ---------------------------------------------------------------------------
@@ -205,19 +206,24 @@ model Student {
   organizationId String
   fullName       String
   externalId     String?
+  // Cohort label (e.g. "Grade 6 (B)") — used by the statistical balance engine
+  // to compare grading consistency across classrooms.
+  classroom      String?
   status         StudentStatus @default(ACTIVE)
   notes          String?       @db.Text
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  marks         Mark[]
-  healthRecords HealthRecord[]
-  assignments   StudentAssignment[]
-  organization  Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  marks           Mark[]
+  healthRecords   HealthRecord[]
+  oralAssessments OralAssessment[]
+  assignments     StudentAssignment[]
+  organization    Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([organizationId, externalId])
   @@index([status])
   @@index([organizationId])
+  @@index([classroom])
 }
 
 model StudentAssignment {
@@ -265,6 +271,48 @@ model HealthRecord {
 
   @@index([studentId])
   @@index([category])
+}
+
+// ---------------------------------------------------------------------------
+// Oral assessment — "Mizan Al-Farooq" criteria-based Qur'anic grading
+// ---------------------------------------------------------------------------
+
+// Four performance descriptors for each rubric criterion. Numeric weights
+// (1..4) live in code (lib/assessment/rubric.ts), not the DB, so the rubric can
+// be re-weighted without a migration.
+enum RubricLevel {
+  BEGINNER
+  DEVELOPING
+  COMPETENT
+  DISTINGUISHED
+}
+
+// One criteria-based oral evaluation of a student (memorization + tajweed +
+// articulation). The equivalent percentage `oralScore` is computed from the
+// three rubric levels at write time so the dashboard's statistical engine can
+// aggregate it cheaply. `writtenScore` is the matching written-theory result,
+// used to detect grade inflation (high, uniform oral marks vs. variable written
+// marks).
+model OralAssessment {
+  id             String      @id @default(cuid())
+  organizationId String
+  studentId      String
+  // What was assessed, e.g. "Al-Mulk 1-10".
+  surah          String
+  hifz           RubricLevel
+  tajweed        RubricLevel
+  makharij       RubricLevel
+  oralScore      Decimal     @db.Decimal(5, 2)
+  writtenScore   Decimal?    @db.Decimal(5, 2)
+  recordedById   String
+  recordedAt     DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([organizationId])
 }
 
 // ---------------------------------------------------------------------------
