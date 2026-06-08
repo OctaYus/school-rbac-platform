@@ -5,6 +5,8 @@
 
 :root {
   --radius: 0.625rem;
+  /* Render native controls (select popups, date pickers, scrollbars) in light. */
+  color-scheme: light;
   /* Brand gradient (logo/wordmark) — overridden per color theme. */
   --brand-from: #6366f1;
   --brand-to: #7c3aed;
@@ -43,6 +45,8 @@
 }
 
 .dark {
+  /* Make native select option-lists, date pickers and scrollbars dark too. */
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -124,6 +128,12 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
+  }
+  /* Fallback for browsers that don't fully theme native option lists from
+   * color-scheme: keep dropdown options readable in dark mode. */
+  select option {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
   }
 }
 
