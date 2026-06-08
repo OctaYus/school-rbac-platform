@@ -1,5 +1,5 @@
 import "server-only";
-import { endOfDay, endOfWeek, startOfDay, startOfWeek, subDays } from "date-fns";
+import { endOfDay, endOfWeek, format, startOfDay, startOfWeek, subDays } from "date-fns";
 import { SessionStatus, StudentStatus, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
@@ -22,6 +22,17 @@ export interface UpcomingSession {
   teacherName: string;
 }
 
+export interface DaySeriesPoint {
+  label: string;
+  taken: number;
+  total: number;
+}
+
+function pctDelta(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
 function countsByKey<T extends { _count: number }>(
   groups: T[],
   key: keyof T,
@@ -38,6 +49,8 @@ export async function getAdminDashboard(organizationId: string) {
   const now = new Date();
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+  const lastWeekStart = subDays(weekStart, 7);
+  const sevenDaysAgo = startOfDay(subDays(now, 6));
   const org = { organizationId };
 
   const [
@@ -92,6 +105,45 @@ export async function getAdminDashboard(organizationId: string) {
     }),
   ]);
 
+  // CRM trend + activity series.
+  const [newThisWeek, newLastWeek, takenThisWeek, takenLastWeek, recentSessions] =
+    await Promise.all([
+      prisma.student.count({ where: { ...org, createdAt: { gte: weekStart } } }),
+      prisma.student.count({
+        where: { ...org, createdAt: { gte: lastWeekStart, lt: weekStart } },
+      }),
+      prisma.session.count({
+        where: {
+          ...org,
+          status: SessionStatus.TAKEN,
+          scheduledAt: { gte: weekStart, lte: weekEnd },
+        },
+      }),
+      prisma.session.count({
+        where: {
+          ...org,
+          status: SessionStatus.TAKEN,
+          scheduledAt: { gte: lastWeekStart, lt: weekStart },
+        },
+      }),
+      prisma.session.findMany({
+        where: { ...org, scheduledAt: { gte: sevenDaysAgo } },
+        select: { scheduledAt: true, status: true },
+      }),
+    ]);
+
+  // Bucket the last 7 days for the activity chart.
+  const weeklySeries: DaySeriesPoint[] = Array.from({ length: 7 }, (_, i) => {
+    const day = startOfDay(subDays(now, 6 - i));
+    const dayEnd = endOfDay(day);
+    const inDay = recentSessions.filter((s) => s.scheduledAt >= day && s.scheduledAt <= dayEnd);
+    return {
+      label: format(day, "EEE"),
+      taken: inDay.filter((s) => s.status === SessionStatus.TAKEN).length,
+      total: inDay.length,
+    };
+  });
+
   return {
     activeStudents,
     totalStudents,
@@ -114,6 +166,12 @@ export async function getAdminDashboard(organizationId: string) {
       durationMin: s.durationMin,
       teacherName: s.teacher.name,
     })) satisfies UpcomingSession[],
+    weeklySeries,
+    newThisWeek,
+    trends: {
+      students: pctDelta(newThisWeek, newLastWeek),
+      sessions: pctDelta(takenThisWeek, takenLastWeek),
+    },
   };
 }
 

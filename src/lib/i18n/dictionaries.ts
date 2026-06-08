@@ -71,6 +71,10 @@ const en = {
   "dash.nothingToday": "Nothing scheduled today.",
   "dash.noStudents": "No assigned students.",
   "dash.noData": "No session data yet.",
+  "dash.activity7d": "Activity — last 7 days",
+  "dash.totalLabel": "Total",
+  "dash.vsLastWeek": "vs last week",
+  "dash.newThisWeek": "new this week",
 
   "students.title": "Students",
   "students.assignedToYou": "Students assigned to you",
@@ -356,6 +360,10 @@ const ar: Dictionary = {
   "dash.nothingToday": "لا شيء مجدول اليوم.",
   "dash.noStudents": "لا يوجد طلاب مسندون.",
   "dash.noData": "لا توجد بيانات جلسات بعد.",
+  "dash.activity7d": "النشاط — آخر ٧ أيام",
+  "dash.totalLabel": "الإجمالي",
+  "dash.vsLastWeek": "مقارنة بالأسبوع الماضي",
+  "dash.newThisWeek": "جديد هذا الأسبوع",
 
   "students.title": "الطلاب",
   "students.assignedToYou": "الطلاب المسندون إليك",

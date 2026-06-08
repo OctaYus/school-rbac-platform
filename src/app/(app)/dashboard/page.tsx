@@ -31,15 +31,16 @@ import {
   SessionList,
 } from "@/components/dashboard/widgets";
 import { StatisticalBalance } from "@/components/dashboard/statistical-balance";
+import { StatusDonut, WeeklyActivityChart } from "@/components/dashboard/charts";
 
 export const metadata = { title: "Dashboard · Scholaris" };
 
-const STUDENT_COLOR: Record<StudentStatus, string> = {
-  ACTIVE: "bg-emerald-500",
-  INACTIVE: "bg-zinc-400",
-  GRADUATED: "bg-sky-500",
-  SUSPENDED: "bg-rose-500",
-  ARCHIVED: "bg-amber-500",
+const STUDENT_HEX: Record<StudentStatus, string> = {
+  ACTIVE: "#10b981",
+  INACTIVE: "#a1a1aa",
+  GRADUATED: "#0ea5e9",
+  SUSPENDED: "#f43f5e",
+  ARCHIVED: "#f59e0b",
 };
 const SESSION_COLOR: Record<string, string> = {
   SCHEDULED: "bg-indigo-500",
@@ -92,15 +93,16 @@ async function AdminView({ organizationId }: { organizationId: string }) {
         <StatCard
           label={t("dash.activeStudents")}
           value={d.activeStudents}
-          hint={`${d.totalStudents} ${t("common.total")}`}
           icon={Users}
           accent="indigo"
+          trend={{ value: d.trends.students, label: t("dash.vsLastWeek"), goodWhenUp: true }}
         />
         <StatCard
           label={t("dash.sessionsToday")}
           value={d.sessionsToday}
           icon={CalendarCheck}
           accent="sky"
+          trend={{ value: d.trends.sessions, label: t("dash.vsLastWeek"), goodWhenUp: true }}
         />
         <StatCard
           label={t("dash.overdueSessions")}
@@ -111,21 +113,28 @@ async function AdminView({ organizationId }: { organizationId: string }) {
         <StatCard
           label={t("dash.activeUsers")}
           value={d.activeUsers}
+          hint={`${d.totalStudents} ${t("common.total")}`}
           icon={UserCheck}
           accent="emerald"
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard title={t("dash.activity7d")} href="/sessions" className="lg:col-span-2">
+          <WeeklyActivityChart data={d.weeklySeries} />
+        </SectionCard>
         <SectionCard title={t("dash.studentsByStatus")} href="/students">
-          <BarBreakdown
-            entries={Object.values(StudentStatus).map((s) => ({
-              label: t(STUDENT_STATUS_KEY[s]),
+          <StatusDonut
+            data={Object.values(StudentStatus).map((s) => ({
+              name: t(STUDENT_STATUS_KEY[s]),
               value: d.studentsByStatus[s] ?? 0,
-              color: STUDENT_COLOR[s],
+              color: STUDENT_HEX[s],
             }))}
           />
         </SectionCard>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
         <SectionCard title={t("dash.weekSessions")} href="/sessions">
           <BarBreakdown
             entries={(["SCHEDULED", "TAKEN", "MISSED", "RESCHEDULED", "CANCELLED"] as const).map(
@@ -137,27 +146,25 @@ async function AdminView({ organizationId }: { organizationId: string }) {
             )}
           />
         </SectionCard>
-      </div>
-
-      <StatisticalBalance data={balance} />
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <SectionCard title={t("dash.upcoming")} href="/sessions">
-          <SessionList
-            empty={t("dash.noUpcoming")}
-            items={d.upcoming.map((s) => ({
-              id: s.id,
-              type: s.type,
-              scheduledAt: s.scheduledAt,
-              durationMin: s.durationMin,
-              sub: s.teacherName,
-            }))}
-          />
-        </SectionCard>
         <SectionCard title={t("dash.recentActivity")} href="/admin/audit">
           <ActivityFeed items={d.recentAudit.map((a) => ({ ...a }))} />
         </SectionCard>
       </div>
+
+      <StatisticalBalance data={balance} />
+
+      <SectionCard title={t("dash.upcoming")} href="/sessions">
+        <SessionList
+          empty={t("dash.noUpcoming")}
+          items={d.upcoming.map((s) => ({
+            id: s.id,
+            type: s.type,
+            scheduledAt: s.scheduledAt,
+            durationMin: s.durationMin,
+            sub: s.teacherName,
+          }))}
+        />
+      </SectionCard>
     </>
   );
 }
