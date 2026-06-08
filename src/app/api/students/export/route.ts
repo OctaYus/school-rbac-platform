@@ -3,13 +3,10 @@ import { format } from "date-fns";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/session";
 import { studentScopeWhere } from "@/lib/db/scope";
+import { csvCell } from "@/lib/security/csv";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
 
 /** Export the caller's (role-scoped) students as CSV. */
 export async function GET() {

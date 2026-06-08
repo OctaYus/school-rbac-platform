@@ -68,6 +68,7 @@ export async function getStudentDetail(user: CurrentUser, id: string) {
 
   const audit = await prisma.auditLog.findMany({
     where: {
+      organizationId: user.organizationId,
       entity: { in: ["Student", "Mark", "HealthRecord", "OralAssessment"] },
       entityId: id,
     },
