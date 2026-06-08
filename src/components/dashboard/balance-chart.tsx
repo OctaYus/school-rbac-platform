@@ -44,6 +44,7 @@ export function BalanceChart({ rows }: { rows: BalanceChartRow[] }) {
           <XAxis dataKey="classroom" tick={{ fontSize: 12 }} stroke="currentColor" />
           <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} stroke="currentColor" />
           <Tooltip
+            cursor={{ fill: "rgba(148, 163, 184, 0.18)" }}
             contentStyle={{
               fontSize: 12,
               borderRadius: 8,
